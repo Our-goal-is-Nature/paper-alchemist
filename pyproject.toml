@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "paper-alchemist"
+version = "0.1.0"
+description = "Cross-agent bilingual academic writing style distillation toolkit"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+authors = [{ name = "Wang-Ruibin" }]
+keywords = ["agent-skills", "academic-writing", "paper", "bilingual", "distillation"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Programming Language :: Python :: 3",
+  "Topic :: Text Processing :: Linguistic",
+]
+dependencies = [
+  "pypdf>=5.0,<7",
+  "python-docx>=1.1,<2",
+  "PyYAML>=6,<7",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<10", "pytest-cov>=5,<8", "build>=1.2,<2"]
+
+[project.scripts]
+paper-alchemist = "paper_alchemist.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/Wang-Ruibin/paper-alchemist"
+Repository = "https://github.com/Wang-Ruibin/paper-alchemist"
+Issues = "https://github.com/Wang-Ruibin/paper-alchemist/issues"
+
+[tool.setuptools.packages.find]
+include = ["paper_alchemist*"]
+
+[tool.setuptools.data-files]
+"share/paper-alchemist/skills/paper-alchemist" = ["skills/paper-alchemist/SKILL.md"]
+"share/paper-alchemist/skills/paper-alchemist/agents" = ["skills/paper-alchemist/agents/openai.yaml"]
+"share/paper-alchemist/skills/paper-alchemist/assets" = ["skills/paper-alchemist/assets/paper-context.example.yaml"]
+"share/paper-alchemist/skills/paper-alchemist/references" = [
+  "skills/paper-alchemist/references/generation.md",
+  "skills/paper-alchemist/references/platforms.md",
+  "skills/paper-alchemist/references/schemas.md",
+  "skills/paper-alchemist/references/workflow.md",
+]
+"share/paper-alchemist/skills/paper-alchemist/scripts" = ["skills/paper-alchemist/scripts/run.py"]
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+testpaths = ["tests"]

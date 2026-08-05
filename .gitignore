@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+dist/
+build/
+*.skill
+.paper-alchemist/cache/
+.paper-alchemist/profiles/
+test-artifacts/

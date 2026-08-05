@@ -1,0 +1,26 @@
+project:
+  title: "Coupled Search for Team Routing"
+  domain: "Operations research"
+  target_language: en
+research:
+  problem: "Jointly select customers and construct routes for a fixed team."
+  gap: "Prior methods weakly couple selection and sequencing."
+  contributions:
+    - "A unified solution representation"
+    - "A coupled insertion neighborhood"
+  method:
+    name: "Coupled neighborhood search"
+    summary: "Jointly changes selection and routing decisions."
+  experiments:
+    datasets_or_instances: ["Verified benchmark set"]
+    baselines: ["Baseline A"]
+    metrics: ["Objective value"]
+  results:
+    - claim: "The proposed method improves the verified average objective."
+      value: "2.4%"
+      comparison: "Baseline A"
+  limitations:
+    - "Only deterministic instances were evaluated."
+citations:
+  baseline2026:
+    purpose: "Supports the baseline description"
