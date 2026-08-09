@@ -15,6 +15,7 @@ from .constants import LANGUAGES, MODULES, OUTPUT_FORMATS
 from .installer import AGENTS, install
 from .packaging import package_skill
 from .profiles import build_profile, integrate_profile, validate_profile
+from .skill_validation import validate_skill_bundle
 
 
 def parser() -> argparse.ArgumentParser:
@@ -32,6 +33,12 @@ def parser() -> argparse.ArgumentParser:
     distill.add_argument("--workspace", type=Path, default=Path.cwd())
     distill.add_argument("--update", action="store_true")
     distill.add_argument("--min-characters", type=int, default=800)
+    distill.add_argument(
+        "--ocr",
+        choices=("auto", "never", "always"),
+        default="auto",
+        help="OCR policy for PDFs: auto for low-text files, never, or always",
+    )
 
     integrate = sub.add_parser("integrate", help="Build language and cross-lingual integrations")
     integrate.add_argument("--profile", required=True)
@@ -64,6 +71,16 @@ def parser() -> argparse.ArgumentParser:
 
     package = sub.add_parser("package-skill", help="Build the paper-alchemist.skill archive")
     package.add_argument("--output", type=Path, default=Path("dist"))
+
+    skill_validation = sub.add_parser(
+        "validate-skill", help="Validate the portable Agent Skill bundle"
+    )
+    skill_validation.add_argument(
+        "path",
+        nargs="?",
+        type=Path,
+        default=Path("skills/paper-alchemist"),
+    )
     return root
 
 
@@ -79,6 +96,7 @@ def main(argv: list[str] | None = None) -> int:
                 language=args.language,
                 update=args.update,
                 min_characters=args.min_characters,
+                ocr_mode=args.ocr,
             )
             _print_json(result)
         elif args.command == "integrate":
@@ -122,6 +140,10 @@ def main(argv: list[str] | None = None) -> int:
         elif args.command == "package-skill":
             target = package_skill(args.output)
             _print_json({"package": str(target)})
+        elif args.command == "validate-skill":
+            result = validate_skill_bundle(args.path)
+            _print_json(result)
+            return 0 if result["valid"] else 2
         else:  # pragma: no cover
             raise AssertionError(f"Unhandled command: {args.command}")
         return 0

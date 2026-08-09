@@ -34,12 +34,13 @@ Paper Alchemist keeps those responsibilities separate:
 - **Bilingual by design** — preserve English and Chinese evidence separately, then blend both during generation; the target writing language leads at roughly 70/30.
 - **Grounded generation** — block drafting until semantic profiles are complete, report missing research facts, and allow only declared citation keys.
 - **Incremental and resumable** — reuse hash-matched extraction caches and invalidate only profiles affected by corpus changes.
+- **Figure/table-aware PDFs** — retain text-bearing visual papers, count figure/table callouts, and optionally OCR low-text or scanned pages.
 - **Cross-Agent** — one open Agent Skill with adapters for Codex, Claude Code, OpenCode, Hermes, Pi Agent, and Kimi Code.
 - **Private by default** — source papers, extracted text, research context, and generated profiles remain outside version control.
 
 ## 60-second start
 
-Python 3.11 or newer is required. `pdftotext` is recommended for PDFs; `pypdf` is the fallback.
+Python 3.11 or newer is required. `pdftotext` is recommended for PDFs; `pypdf` is the text-layer fallback. Optional OCR requires both `pdftoppm` and `tesseract` on `PATH` (install Chinese language data to OCR Chinese pages).
 
 ```bash
 git clone https://github.com/Wang-Ruibin/paper-alchemist.git
@@ -60,7 +61,7 @@ paper-alchemist install --agent codex --scope user
 Distill a paper folder:
 
 ```bash
-paper-alchemist distill ./papers --profile routing-literature --language auto
+paper-alchemist distill ./papers --profile routing-literature --language auto --ocr auto
 ```
 
 Ask the installed Skill to finish semantic distillation, then integrate:
@@ -80,16 +81,17 @@ Draft an abstract through the Agent:
 
 ```mermaid
 flowchart LR
-    A[PDF / LaTeX / DOCX / Markdown / TXT] --> B[Local extraction and sectioning]
-    B --> C[Private bilingual packets]
-    C --> D[Agent semantic synthesis by module]
-    D --> E[English and Chinese profiles]
-    E --> F[Cross-lingual integration]
-    G[Verified paper-context.yaml] --> H[Grounded section drafting]
-    F --> H
+    A[PDF / LaTeX / DOCX / Markdown / TXT] --> B[Text layer / optional OCR]
+    B --> C[Sectioning and visual-callout statistics]
+    C --> D[Private bilingual packets]
+    D --> E[Agent semantic synthesis by module]
+    E --> F[English and Chinese profiles]
+    F --> G[Cross-lingual integration]
+    H[Verified paper-context.yaml] --> I[Grounded section drafting]
+    G --> I
 ```
 
-1. `distill` discovers papers, extracts text, removes references and appendices, detects language, segments modules, and creates private evidence packets.
+1. `distill` discovers papers, extracts text layers or optional OCR, removes references and appendices, detects language, segments modules, and creates private evidence packets.
 2. The active Agent reviews packets and replaces quantitative seeds with aggregate semantic findings.
 3. `integrate` refuses incomplete or stale module profiles, then builds English, Chinese, cross-lingual, and conflict profiles.
 4. A section command builds a generation brief, checks required facts and citations, and drafts in the requested language and format.
@@ -98,12 +100,13 @@ flowchart LR
 
 | Command | Purpose |
 |---|---|
-| `distill SOURCE --profile NAME --language auto\|en\|zh` | Extract and partition a corpus |
+| `distill SOURCE --profile NAME --language auto\|en\|zh --ocr auto\|never\|always` | Extract and partition a corpus, with optional PDF OCR |
 | `integrate --profile NAME` | Integrate completed semantic profiles |
 | `validate-profile --profile NAME` | Report structural, semantic, confidence, and integration status |
 | `brief MODULE --profile NAME --language en\|zh` | Build a grounded bilingual drafting brief |
 | `install --agent AGENT --scope user\|project` | Install the core Skill and native wrappers |
 | `package-skill --output dist` | Build `paper-alchemist.skill` |
+| `validate-skill [PATH]` | Validate the portable Agent Skill bundle |
 
 Section operations:
 
@@ -136,6 +139,8 @@ The secondary language contributes rhetorical function and information organizat
 
 Paper Alchemist never invents contributions, methods, datasets, baselines, parameters, results, significance, limitations, or citations. LaTeX uses `\cite{key}`; Markdown uses only the citation convention and keys declared in the context.
 
+For figure/table-heavy PDFs, the corpus may teach how authors introduce, compare, and interpret visual evidence. Numeric values remain research facts: the Agent may use them in generated prose only when they are also present in `paper-context.yaml` or explicitly confirmed by the user. OCR recovers text; it does not infer chart geometry or unlabelled values.
+
 ## Repository layout
 
 ```text
@@ -150,9 +155,11 @@ docs/                        architecture and repository policy
 
 Private research data belongs in `.paper-alchemist/`, `papers/`, `corpus/`, or a local `paper-context.yaml`; these paths are ignored by Git. See [repository policy](docs/repository-policy.md).
 
+The implementation-to-plan audit, including later license and figure-PDF decisions, is maintained in [original plan compliance](docs/plan-compliance.md).
+
 ## Validation
 
-The original English test corpus contained 25 PDFs and one LaTeX paper. The extraction run discovered all 26 files, included 22 structured papers, and explicitly excluded four low-text or structurally insufficient files. Real corpus files, caches, and generated test profiles are not published.
+The original English test corpus contained 25 PDFs and one LaTeX paper. The current specified directory has grown to 41 supported candidate files. The latest run included 29 sources, including seven figure/table-heavy PDFs routed to `results-analysis`, and reported 12 exclusions. One low-text PDF requested automatic OCR but remained excluded because Tesseract is not installed in the test WSL environment; that dependency failure was recorded rather than hidden. Real corpus files, caches, and generated test profiles are not published.
 
 Original bilingual fixtures cover language detection, section recognition, reference/appendix removal, hash-based updates, interruption recovery, semantic completion gates, bilingual fallback, citations, installers, and release packaging. See [`examples/`](examples/) for grounded LaTeX and Markdown outputs.
 

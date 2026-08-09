@@ -18,6 +18,9 @@ All notable changes are documented here.
 
 - Architecture, contribution, security, and community documentation.
 - Validation for pending, stale, integrated, and generation-ready profile states.
+- Support for text-bearing figure/table-heavy PDFs instead of excluding them by prose density.
+- Optional `auto`, `never`, and `always` PDF OCR modes backed by `pdftoppm` and Tesseract.
+- Figure/table reference statistics in module seeds, observations, and quality reports.
 
 ## [0.1.0] - 2026-08-05
 

@@ -230,6 +230,23 @@ def academic_heading_count(text: str) -> int:
     return len(found)
 
 
+def prose_density(text: str) -> float:
+    """Estimate how much extracted text resembles prose rather than labels or tables."""
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
+    total_characters = sum(len(line) for line in lines)
+    if not total_characters:
+        return 0.0
+    prose_characters = 0
+    for line in lines:
+        word_count = len(re.findall(r"\b[A-Za-z][A-Za-z'-]*\b", line))
+        cjk_count = len(re.findall(r"[\u3400-\u9fff]", line))
+        language_characters = len(re.findall(r"[A-Za-z\u3400-\u9fff]", line))
+        language_ratio = language_characters / max(len(line), 1)
+        if language_ratio >= 0.5 and (word_count >= 8 or cjk_count >= 24):
+            prose_characters += len(line)
+    return round(prose_characters / total_characters, 4)
+
+
 def text_statistics(text: str, language: str) -> dict[str, float | int]:
     paragraphs = [p.strip() for p in re.split(r"\n\s*\n", text) if len(p.strip()) >= 20]
     sentences = [s.strip() for s in _SENTENCE_SPLIT.split(text) if len(s.strip()) >= 5]
@@ -246,6 +263,8 @@ def text_statistics(text: str, language: str) -> dict[str, float | int]:
         )
     )
     first_person = len(re.findall(r"\b(?:we|our)\b|本文|我们", text, re.I))
+    figure_mentions = len(re.findall(r"\bfig(?:ure)?\.?\s*\d+[a-z]?|图\s*\d+[a-z]?", text, re.I))
+    table_mentions = len(re.findall(r"\btable\s*\d+[a-z]?|表\s*\d+[a-z]?", text, re.I))
     return {
         "characters": len(text),
         "paragraphs": len(paragraphs),
@@ -254,4 +273,6 @@ def text_statistics(text: str, language: str) -> dict[str, float | int]:
         "citations": citation_count,
         "hedges": hedges,
         "first_person_markers": first_person,
+        "figure_mentions": figure_mentions,
+        "table_mentions": table_mentions,
     }

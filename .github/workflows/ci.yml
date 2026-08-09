@@ -27,6 +27,7 @@ jobs:
       - run: ruff check .
       - run: pytest
       - run: python -m build
+      - run: paper-alchemist validate-skill
       - run: paper-alchemist install --agent codex --scope project --project-root "$RUNNER_TEMP/install-codex" --dry-run
       - run: paper-alchemist package-skill --output dist
       - if: matrix.python-version == '3.13'

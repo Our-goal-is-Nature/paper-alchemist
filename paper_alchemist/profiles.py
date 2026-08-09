@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import re
 import unicodedata
-from collections import defaultdict
+from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from hashlib import sha256
 from pathlib import Path
@@ -17,7 +17,7 @@ import yaml
 from .constants import MODULE_TITLES, MODULES, PROFILE_HEADINGS
 from .extractors import discover_papers, extract_text, file_sha256
 from .language import detect_language, language_scores
-from .sections import academic_heading_count, segment_sections, text_statistics
+from .sections import academic_heading_count, prose_density, segment_sections, text_statistics
 
 
 def utc_now() -> str:
@@ -44,7 +44,10 @@ def build_profile(
     language: str = "auto",
     update: bool = False,
     min_characters: int = 800,
+    ocr_mode: str = "auto",
 ) -> dict[str, Any]:
+    if ocr_mode not in {"auto", "never", "always"}:
+        raise ValueError("ocr_mode must be auto, never, or always")
     slug = profile_slug(profile)
     root = state_root(workspace)
     profile_dir = root / "profiles" / slug
@@ -79,6 +82,12 @@ def build_profile(
         cache_matches = bool(
             cached_meta.get("sha256") == digest and (document_cache / "full.txt").exists()
         )
+        if path.suffix.casefold() == ".pdf":
+            cache_matches = bool(
+                cache_matches
+                and cached_meta.get("pdf_extraction_version") == 2
+                and cached_meta.get("ocr_mode") == ocr_mode
+            )
         manifest_matches = bool(previous and previous.get("sha256") == digest)
         # A matching private cache is sufficient for --update. This also lets an
         # interrupted first run resume when it stopped before writing the manifest.
@@ -87,25 +96,49 @@ def build_profile(
         if can_reuse:
             text = (document_cache / "full.txt").read_text(encoding="utf-8")
             backend = cached_meta.get("backend", "cache")
+            ocr_used = bool(cached_meta.get("ocr_used", False))
             warnings.extend(cached_meta.get("warnings", []))
             status = "reused"
         else:
-            extraction = extract_text(path)
+            extraction = extract_text(path, ocr_mode=ocr_mode)
             text = extraction.text.replace("\x00", "").strip()
             backend = extraction.backend
+            ocr_used = extraction.ocr_used
             warnings.extend(extraction.warnings)
             status = "extracted"
 
         doc_language = language if language in {"en", "zh"} else detect_language(text)
         sections = segment_sections(text)
         heading_count = academic_heading_count(text)
+        density = prose_density(text)
+        document_statistics = text_statistics(text, doc_language)
+        visual_mentions = int(document_statistics["figure_mentions"]) + int(
+            document_statistics["table_mentions"]
+        )
+        content_mode = (
+            "figure-or-table-heavy"
+            if path.suffix.casefold() == ".pdf"
+            and (density < 0.18 or (len(sections) < 2 and visual_mentions >= 3))
+            else "prose"
+        )
+        if (
+            len(text) >= min_characters
+            and doc_language != "unknown"
+            and content_mode == "figure-or-table-heavy"
+            and len(sections) < 2
+        ):
+            # Visual supplements often have captions, labels, or tabular results but
+            # no conventional paper headings. Route them to the only module where
+            # their presentation patterns are relevant instead of treating values as
+            # a complete paper narrative.
+            sections = {"results-analysis": text}
         included = True
         reason = "included"
         if len(text) < min_characters:
             included, reason = False, "low-text-or-scanned"
         elif doc_language == "unknown":
             included, reason = False, "language-undetermined"
-        elif len(sections) < 2:
+        elif len(sections) < 2 and content_mode != "figure-or-table-heavy":
             included, reason = False, "insufficient-paper-structure"
 
         entry = {
@@ -115,11 +148,14 @@ def build_profile(
             "sha256": digest,
             "format": path.suffix.casefold().lstrip("."),
             "backend": backend,
+            "ocr_used": ocr_used,
+            "content_mode": content_mode,
             "language": doc_language,
             "language_scores": language_scores(text),
             "characters": len(text),
             "recognized_modules": sorted(sections),
             "academic_heading_count": heading_count,
+            "prose_density": density,
             "included": included,
             "reason": reason,
             "cache_status": status,
@@ -131,7 +167,14 @@ def build_profile(
         (document_cache / "full.txt").write_text(text, encoding="utf-8")
         _write_json(
             document_cache / "meta.json",
-            {"sha256": digest, "backend": backend, "warnings": warnings},
+            {
+                "sha256": digest,
+                "backend": backend,
+                "warnings": warnings,
+                "ocr_mode": ocr_mode,
+                "ocr_used": ocr_used,
+                "pdf_extraction_version": 2 if path.suffix.casefold() == ".pdf" else None,
+            },
         )
         if not included:
             continue
@@ -151,6 +194,7 @@ def build_profile(
                     "source": relative,
                     "cache_path": str(section_path.resolve()),
                     "text": section_text,
+                    "content_mode": content_mode,
                     "statistics": text_statistics(section_text, section_language),
                 }
             )
@@ -162,6 +206,7 @@ def build_profile(
         "created_at": previous_manifest.get("created_at", utc_now()),
         "updated_at": utc_now(),
         "language_mode": language,
+        "ocr_mode": ocr_mode,
         "documents": documents,
     }
     _write_json(profile_dir / "source-manifest.json", manifest)
@@ -198,6 +243,7 @@ def build_profile(
                 elif status == "stale":
                     semantic_refresh.append(f"{lang}/{module}")
             _write_packets(cache_dir, lang, module, samples)
+            _write_observations(cache_dir, lang, module, samples)
 
     quality = _quality_report(
         slug,
@@ -337,6 +383,9 @@ def _render_module_seed(
     profile: str, language: str, module: str, samples: list[dict[str, Any]]
 ) -> str:
     count = len(samples)
+    visual_source_count = sum(
+        1 for sample in samples if sample.get("content_mode") == "figure-or-table-heavy"
+    )
     confidence = "high" if count >= 8 else "medium" if count >= 3 else "low"
     statistics = [sample["statistics"] for sample in samples]
     averages = {
@@ -348,6 +397,8 @@ def _render_module_seed(
             "citations",
             "hedges",
             "first_person_markers",
+            "figure_mentions",
+            "table_mentions",
         )
     }
     metadata = {
@@ -355,12 +406,14 @@ def _render_module_seed(
         "language": language,
         "module": module,
         "source_count": count,
+        "visual_source_count": visual_source_count,
         "confidence": confidence,
         "synthesis_status": "pending",
     }
     front = yaml.safe_dump(metadata, sort_keys=False, allow_unicode=True).strip()
     source_list = (
-        "\n".join(f"- `{item['source']}`" for item in samples) or "- No qualifying samples."
+        "\n".join(f"- `{item['source']}` ({item.get('content_mode', 'prose')})" for item in samples)
+        or "- No qualifying samples."
     )
     body = [
         f"---\n{front}\n---",
@@ -402,6 +455,7 @@ def _write_packets(
                     f"## Source {sample['document_id']}",
                     "",
                     f"Path label: `{sample['source']}`",
+                    f"Content mode: `{sample.get('content_mode', 'prose')}`",
                     "",
                     sample["text"][:16000],
                 ]
@@ -409,6 +463,65 @@ def _write_packets(
         (target / f"batch-{start // batch_size + 1:03d}.md").write_text(
             "\n".join(lines).rstrip() + "\n", encoding="utf-8"
         )
+
+
+def _write_observations(
+    cache_dir: Path,
+    language: str,
+    module: str,
+    samples: list[dict[str, Any]],
+) -> None:
+    target = cache_dir / "observations" / language / module
+    target.mkdir(parents=True, exist_ok=True)
+    expected = {f"{sample['document_id']}.md" for sample in samples}
+    for old in target.glob("*.md"):
+        if old.name not in expected:
+            old.unlink()
+    for sample in samples:
+        path = target / f"{sample['document_id']}.md"
+        if path.exists():
+            continue
+        metadata = {
+            "document_id": sample["document_id"],
+            "source": sample["source"],
+            "language": language,
+            "module": module,
+            "content_mode": sample.get("content_mode", "prose"),
+            "observation_status": "pending",
+        }
+        frontmatter = yaml.safe_dump(metadata, sort_keys=False, allow_unicode=True).strip()
+        statistics = sample["statistics"]
+        lines = [
+            f"---\n{frontmatter}\n---",
+            f"# Observation: {language}/{module}",
+            "",
+            "> Private working record. Summarize this source at the functional level; do not copy distinctive phrases.",
+            "",
+            "## Quantitative evidence",
+            "",
+            *[f"- {key.replace('_', ' ')}: {value}" for key, value in statistics.items()],
+            "",
+            "## Rhetorical moves and order",
+            "",
+            "- Pending Agent observation.",
+            "",
+            "## Language and stance",
+            "",
+            "- Pending Agent observation.",
+            "",
+            "## Evidence introduction",
+            "",
+            "- Pending Agent observation.",
+            "",
+            "## Transferable pattern",
+            "",
+            "- Pending Agent observation.",
+            "",
+            "## Risks and exceptions",
+            "",
+            "- Pending Agent observation.",
+        ]
+        path.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
 
 
 def _quality_report(
@@ -422,6 +535,25 @@ def _quality_report(
         lang: {module: len(module_samples[lang].get(module, [])) for module in MODULES}
         for lang in ("en", "zh")
     }
+    module_confidence = {
+        lang: {
+            module: (
+                "high"
+                if sample_counts[lang][module] >= 8
+                else "medium"
+                if sample_counts[lang][module] >= 3
+                else "low"
+            )
+            for module in MODULES
+        }
+        for lang in ("en", "zh")
+    }
+    included_documents = [item for item in documents if item["included"]]
+    excluded_documents = [item for item in documents if not item["included"]]
+    exclusions = Counter(item["reason"] for item in excluded_documents)
+    formats = Counter(item["format"] for item in documents)
+    languages = Counter(item["language"] for item in included_documents)
+    content_modes = Counter(item["content_mode"] for item in included_documents)
     metrics: dict[str, dict[str, dict[str, float]]] = {"en": {}, "zh": {}}
     for lang in ("en", "zh"):
         for module in MODULES:
@@ -433,6 +565,8 @@ def _quality_report(
                     "citations",
                     "hedges",
                     "first_person_markers",
+                    "figure_mentions",
+                    "table_mentions",
                 )
             }
     return {
@@ -442,7 +576,27 @@ def _quality_report(
         "documents_found": len(documents),
         "documents_included": sum(1 for item in documents if item["included"]),
         "documents_excluded": sum(1 for item in documents if not item["included"]),
+        "source_coverage": {
+            "included_ratio": round(len(included_documents) / len(documents), 4)
+            if documents
+            else 0.0,
+            "formats": dict(sorted(formats.items())),
+            "included_languages": dict(sorted(languages.items())),
+            "included_content_modes": dict(sorted(content_modes.items())),
+            "ocr_documents": sum(1 for item in included_documents if item["ocr_used"]),
+            "exclusions_by_reason": dict(sorted(exclusions.items())),
+        },
+        "anomalies": [
+            {
+                "source": item["relative_path"],
+                "reason": item["reason"],
+                "warnings": item["warnings"],
+            }
+            for item in documents
+            if not item["included"] or item["warnings"]
+        ],
         "module_samples": sample_counts,
+        "module_confidence": module_confidence,
         "metrics": metrics,
         "module_fingerprints": module_fingerprints,
         "semantic_refresh_required": semantic_refresh,
@@ -465,7 +619,8 @@ def _module_fingerprints(
             evidence = []
             for sample in module_samples[lang].get(module, []):
                 content_hash = sha256(sample["text"].encode("utf-8")).hexdigest()
-                evidence.append(f"{sample['source']}:{content_hash}")
+                content_mode = sample.get("content_mode", "prose")
+                evidence.append(f"{sample['source']}:{content_mode}:{content_hash}")
             payload = "\n".join(sorted(evidence)).encode("utf-8")
             fingerprints[lang][module] = sha256(payload).hexdigest()
     return fingerprints

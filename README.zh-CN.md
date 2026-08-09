@@ -34,12 +34,13 @@ Paper Alchemist 将这两类职责严格分离：
 - **原生双语设计**：蒸馏阶段分别保存中英文证据；生成阶段同时借鉴两种语言，目标语言约占 70%。
 - **事实约束生成**：语义画像未完成时禁止写作；检查当前章节缺失的研究事实，并只允许使用声明过的 citation key。
 - **增量与续跑**：复用哈希一致的抽取缓存，只将受到语料变化影响的模块画像标记为过期。
+- **支持图表型 PDF**：保留具有文本层的图表密集论文，统计图表引用，并可对低文本或扫描页执行 OCR。
 - **跨 Agent 使用**：同一开放 Skill 支持 Codex、Claude Code、OpenCode、Hermes、Pi Agent 和 Kimi Code。
 - **默认保护隐私**：论文原文、抽取全文、研究上下文和生成画像默认不进入版本控制。
 
 ## 60 秒上手
 
-需要 Python 3.11 或更高版本。PDF 推荐安装 `pdftotext`，未安装时回退到 `pypdf`。
+需要 Python 3.11 或更高版本。PDF 推荐安装 `pdftotext`，文本层抽取失败时回退到 `pypdf`。可选 OCR 需要系统 `PATH` 中同时存在 `pdftoppm` 和 `tesseract`；处理中文页面还需安装 Tesseract 中文语言数据。
 
 ```bash
 git clone https://github.com/Wang-Ruibin/paper-alchemist.git
@@ -60,7 +61,7 @@ paper-alchemist install --agent codex --scope user
 蒸馏论文目录：
 
 ```bash
-paper-alchemist distill ./papers --profile routing-literature --language auto
+paper-alchemist distill ./papers --profile routing-literature --language auto --ocr auto
 ```
 
 让已安装的 Skill 完成模块语义蒸馏，然后整合：
@@ -80,16 +81,17 @@ paper-alchemist validate-profile --profile routing-literature
 
 ```mermaid
 flowchart LR
-    A[PDF / LaTeX / DOCX / Markdown / TXT] --> B[本地抽取与章节识别]
-    B --> C[私有中英文证据包]
-    C --> D[Agent 按模块进行语义蒸馏]
-    D --> E[中文画像与英文画像]
-    E --> F[跨语言整合]
-    G[已核验的 paper-context.yaml] --> H[事实约束章节生成]
-    F --> H
+    A[PDF / LaTeX / DOCX / Markdown / TXT] --> B[文本层 / 可选 OCR]
+    B --> C[章节识别与图表引用统计]
+    C --> D[私有中英文证据包]
+    D --> E[Agent 按模块进行语义蒸馏]
+    E --> F[中文画像与英文画像]
+    F --> G[跨语言整合]
+    H[已核验的 paper-context.yaml] --> I[事实约束章节生成]
+    G --> I
 ```
 
-1. `distill` 发现文件、抽取正文、排除参考文献和附录、检测语言、识别论文结构并生成私有证据包。
+1. `distill` 发现文件、抽取文本层或执行可选 OCR、排除参考文献和附录、检测语言、识别论文结构并生成私有证据包。
 2. 当前 Agent 阅读证据包，将定量 seed profile 替换为跨论文语义规律。
 3. `integrate` 拒绝未完成或已过期的模块画像，再生成中文、英文、跨语言和冲突画像。
 4. 章节命令生成写作 brief，检查必要事实与引用，然后以指定语言和格式写作。
@@ -98,12 +100,13 @@ flowchart LR
 
 | 命令 | 用途 |
 |---|---|
-| `distill SOURCE --profile NAME --language auto\|en\|zh` | 抽取并划分论文语料 |
+| `distill SOURCE --profile NAME --language auto\|en\|zh --ocr auto\|never\|always` | 抽取并划分论文语料，可选 PDF OCR |
 | `integrate --profile NAME` | 整合已经完成的语义画像 |
 | `validate-profile --profile NAME` | 报告结构、语义、置信度和整合状态 |
 | `brief MODULE --profile NAME --language en\|zh` | 生成受事实约束的双语写作 brief |
 | `install --agent AGENT --scope user\|project` | 安装核心 Skill 与平台命令包装器 |
 | `package-skill --output dist` | 构建 `paper-alchemist.skill` |
+| `validate-skill [PATH]` | 校验可移植 Agent Skill 包 |
 
 章节操作包括：
 
@@ -136,6 +139,8 @@ flowchart LR
 
 Paper Alchemist 不会编造贡献、方法、数据集、基线、参数、结果、显著性、局限或引用。LaTeX 使用 `\cite{key}`；Markdown 只使用上下文中声明的引用格式与 citation key。
 
+对于图表型 PDF，语料可以用于提炼作者如何引入、比较和解释图表证据，但数值仍属于研究事实：只有当数值同时出现在 `paper-context.yaml` 中，或由使用者明确确认时，Agent 才能将其写入正文。OCR 只恢复文字，不推断曲线几何关系或未标注数值。
+
 ## 仓库结构
 
 ```text
@@ -150,9 +155,11 @@ docs/                        架构和公开仓库策略
 
 私有研究数据应放在 `.paper-alchemist/`、`papers/`、`corpus/` 或本地 `paper-context.yaml` 中；这些位置默认被 Git 忽略。详细规则见[仓库公开策略](docs/repository-policy.md)。
 
+原计划的逐项实现状态，以及后续许可证和图表型 PDF 决策，见[原计划合规审计](docs/plan-compliance.md)。
+
 ## 验证情况
 
-英文真实测试语料包含 25 个 PDF 和 1 个 LaTeX 文件。抽取流程发现全部 26 个文件，其中 22 篇具有有效结构并被纳入，4 篇因低文本或论文结构不足被明确排除。真实论文、缓存和测试画像均未公开。
+最初的英文真实测试语料包含 25 个 PDF 和 1 个 LaTeX 文件；当前指定目录已经增长到 41 个受支持的候选文件。最新测试纳入 29 个来源，其中 7 个图表/表格型 PDF 被路由到 `results-analysis`，另有 12 个文件被明确排除。一个低文本 PDF 自动请求了 OCR，但测试 WSL 环境尚未安装 Tesseract，因此仍被排除；该依赖缺失被如实记录，没有静默忽略。真实论文、缓存和测试画像均未公开。
 
 原创双语 fixtures 覆盖语言检测、章节识别、参考文献和附录剔除、哈希更新、中断续跑、语义完成门禁、双语降级、引用、六平台安装和发布构建。可在 [`examples/`](examples/) 查看受事实约束的 LaTeX 与 Markdown 示例。
 

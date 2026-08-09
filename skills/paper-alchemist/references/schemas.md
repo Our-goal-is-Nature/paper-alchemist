@@ -2,10 +2,21 @@
 
 ## Contents
 
+- Source manifest
 - Module profile
 - Paper context
 - Generation brief
 - Confidence
+
+## Source manifest
+
+Each document records its hash, format, detected language, inclusion decision, extraction backend, warnings, and recognized modules. PDF-specific audit fields are:
+
+- `content_mode`: `prose` or `figure-or-table-heavy`;
+- `ocr_used`: whether OCR text replaced the text-layer result;
+- root-level `ocr_mode`: `auto`, `never`, or `always` for the run.
+
+`figure-or-table-heavy` is descriptive, not an exclusion reason. A visual supplement with enough recovered text but no conventional headings is routed only to `results-analysis`; it is not treated as a complete paper narrative.
 
 ## Module profile
 
@@ -16,9 +27,12 @@ profile: profile-slug
 language: en
 module: abstract
 source_count: 8
+visual_source_count: 0
 confidence: high
 synthesis_status: complete
 ```
+
+`visual_source_count` reports how many sources in this module are figure/table-heavy. It is normally nonzero only for `results-analysis`; treat those sources as evidence about visual presentation, not as factual evidence for generated claims.
 
 Status values:
 

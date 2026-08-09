@@ -56,6 +56,8 @@ Apply the selected module contract:
 
 Use `\cite{key}` for LaTeX and the supplied citation convention for Markdown. Never use a key absent from `allowed_citation_keys`.
 
+When profiles include figure/table patterns, transfer only their rhetorical function: how a visual is introduced, what comparison is foregrounded, and how observations are separated from explanations. Use a figure number, table number, caption claim, or numeric value only when it appears in the verified context or the user explicitly supplies it. Never estimate a value from chart pixels.
+
 ## Validate the output
 
 Before returning:

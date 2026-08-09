@@ -5,6 +5,7 @@ from zipfile import ZipFile
 import yaml
 
 from paper_alchemist.packaging import package_skill
+from paper_alchemist.skill_validation import validate_skill_bundle
 
 ROOT = Path(__file__).parents[1]
 
@@ -27,6 +28,8 @@ def test_skill_frontmatter_remains_portable_and_minimal():
         (ROOT / "skills" / "paper-alchemist" / "agents" / "openai.yaml").read_text(encoding="utf-8")
     )
     assert "$paper-alchemist" in openai_metadata["interface"]["default_prompt"]
+    validation = validate_skill_bundle(ROOT / "skills" / "paper-alchemist")
+    assert validation["valid"], validation["errors"]
 
 
 def test_private_research_paths_are_ignored_by_default():

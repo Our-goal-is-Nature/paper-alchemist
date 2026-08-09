@@ -6,7 +6,7 @@ Paper Alchemist deliberately separates deterministic processing from Agent judgm
 paper corpus
     |
     v
-local extraction -> canonical sections -> language-specific private packets
+text layer / optional OCR -> canonical sections -> language-specific private packets
                                               |
                                               v
                                     Agent semantic synthesis
@@ -27,6 +27,7 @@ verified paper-context.yaml ------------------+----> grounded drafting brief
 The `paper_alchemist` Python package owns operations that should be reproducible:
 
 - recursive discovery and format-specific extraction;
+- PDF text-layer extraction, optional page OCR, and figure/table callout statistics;
 - SHA-256 cache identity and interruption recovery;
 - language detection and canonical section recognition;
 - descriptive statistics, manifests, confidence, and schema validation;

@@ -1,7 +1,12 @@
 from pathlib import Path
 
 from paper_alchemist.language import detect_language
-from paper_alchemist.sections import looks_like_heading, segment_sections, text_statistics
+from paper_alchemist.sections import (
+    looks_like_heading,
+    prose_density,
+    segment_sections,
+    text_statistics,
+)
 
 FIXTURES = Path(__file__).parent / "fixtures" / "corpus"
 
@@ -27,12 +32,25 @@ def test_section_detection_finds_all_standard_modules():
 
 
 def test_statistics_are_language_aware():
-    en = text_statistics("We report a result. It may improve reliability.", "en")
+    en = text_statistics(
+        "We report a result in Figure 2 and Table 3. It may improve reliability.", "en"
+    )
     zh = text_statistics("本文报告实验结果。该方法可能提高稳定性。", "zh")
     assert en["sentences"] == 2
     assert zh["sentences"] == 2
     assert en["hedges"] == 1
     assert zh["hedges"] == 1
+    assert en["figure_mentions"] == 1
+    assert en["table_mentions"] == 1
+
+
+def test_prose_density_distinguishes_sentences_from_numeric_table_rows():
+    prose = "\n".join(
+        ["This sentence explains an experimental result with enough words for prose."] * 5
+    )
+    table = "\n".join(["Table 1 0.12 0.34 0.56"] * 20)
+    assert prose_density(prose) > 0.8
+    assert prose_density(table) < 0.2
 
 
 def test_two_column_and_descriptive_headings_are_recognized():

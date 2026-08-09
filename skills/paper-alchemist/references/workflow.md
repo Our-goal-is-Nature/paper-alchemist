@@ -14,16 +14,19 @@
 Run from the research project where `.paper-alchemist/` should live:
 
 ```bash
-paper-alchemist distill <paper-folder> --profile <name> --language auto
+paper-alchemist distill <paper-folder> --profile <name> --language auto --ocr auto
 ```
 
 Use `--language en` or `--language zh` only when the user explicitly wants to override detection. Use `--update` only for an existing profile the user asked to refresh.
 
-Read the JSON result and inspect `.paper-alchemist/profiles/<name>/source-manifest.json`. Report excluded files and their reasons. Do not claim that scanned or low-text PDFs were distilled.
+Use `--ocr auto` to OCR only low-text PDFs, `--ocr always` for image-heavy pages whose text layer is incomplete, or `--ocr never` to disable OCR. OCR requires `pdftoppm` and `tesseract`; Chinese OCR also requires the `chi_sim` language pack. Do not install those tools silently.
+
+Read the JSON result and inspect `.paper-alchemist/profiles/<name>/source-manifest.json`. Report excluded files and their reasons. Check `content_mode`, `ocr_used`, and extraction warnings. Do not claim that a scanned or low-text PDF was distilled when OCR was unavailable or unsuccessful.
 
 The command creates:
 
 - private extracted text and batch packets under `.paper-alchemist/cache/<name>/`;
+- one private observation record per paper and recognized module under `.paper-alchemist/cache/<name>/observations/`;
 - deterministic seed profiles under `.paper-alchemist/profiles/<name>/<lang>/modules/`;
 - source and quality manifests under `.paper-alchemist/profiles/<name>/`.
 
@@ -33,12 +36,19 @@ Process one language and module at a time. Read packet files under:
 
 `.paper-alchemist/cache/<name>/packets/<lang>/<module>/batch-*.md`
 
+For each source in a packet, complete its matching private observation record under:
+
+`.paper-alchemist/cache/<name>/observations/<lang>/<module>/<document-id>.md`
+
+Replace pending markers and set `observation_status: complete`. Use the completed observation records, rather than raw passages, when merging corpus-level findings.
+
 For each packet, record only aggregate observations:
 
 - rhetorical moves and their typical order;
 - paragraph roles and transitions;
 - stance, voice, tense, hedging, and claim strength;
 - citation and quantitative-evidence placement;
+- figure/table introduction, cross-reference, comparison, and interpretation patterns;
 - module-specific comparison or analysis patterns;
 - reusable checks and failure modes.
 
@@ -88,6 +98,8 @@ Never overwrite a completed semantic profile with a quantitative seed without re
 
 - Keep `.paper-alchemist/cache/` out of version control.
 - Do not copy source papers into the profile or skill.
-- Stop and report password-protected, corrupt, scanned, or unsupported files.
-- If extraction yields fewer than two recognizable paper modules, exclude the file as insufficient structure.
+- Retain figure/table-heavy PDFs when extraction yields sufficient text. If they lack conventional sections, use their evidence only for `results-analysis` observations and explicitly note limited prose evidence.
+- Stop and report password-protected, corrupt, unsupported, or still-low-text files after the selected OCR policy runs.
+- Treat OCR as text recovery, not as authorization to infer unlabelled values from chart geometry or images.
+- If extraction yields fewer than two recognizable paper modules, exclude it as insufficient structure unless it is classified as a figure/table-heavy visual supplement; visual supplements contribute only to `results-analysis`.
 - If one corpus language is missing, finish the available language and mark bilingual integration as degraded.

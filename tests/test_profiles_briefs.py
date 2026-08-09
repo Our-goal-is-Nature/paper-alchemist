@@ -4,8 +4,10 @@ from pathlib import Path
 
 import pytest
 
+import paper_alchemist.profiles as profiles_module
 from paper_alchemist.briefs import build_generation_brief
 from paper_alchemist.constants import MODULES
+from paper_alchemist.extractors import Extraction
 from paper_alchemist.profiles import (
     build_profile,
     integrate_profile,
@@ -47,6 +49,22 @@ def test_bilingual_profile_and_generation_brief(tmp_path):
     profile_dir = tmp_path / ".paper-alchemist" / "profiles" / "bilingual-demo"
     quality = json.loads((profile_dir / "quality.json").read_text(encoding="utf-8"))
     assert quality["bilingual_status"] == "complete"
+    assert quality["source_coverage"]["included_ratio"] == 1.0
+    assert quality["module_confidence"]["en"]["abstract"] == "low"
+    assert quality["anomalies"] == []
+    observations = list(
+        (
+            tmp_path
+            / ".paper-alchemist"
+            / "cache"
+            / "bilingual-demo"
+            / "observations"
+            / "en"
+            / "abstract"
+        ).glob("*.md")
+    )
+    assert len(observations) == 1
+    assert "observation_status: pending" in observations[0].read_text(encoding="utf-8")
     assert not (profile_dir / "bilingual" / "cross-lingual.md").exists()
 
     validation = validate_profile("Bilingual Demo", tmp_path)
@@ -165,3 +183,60 @@ def test_missing_context_is_reported_not_invented(tmp_path):
     brief = build_generation_brief("demo", "results-analysis", "zh", "markdown", tmp_path)
     assert brief["missing_context_fields"] == ["research.results"]
     assert brief["allowed_citation_keys"] == []
+
+
+def test_figure_or_table_heavy_pdf_is_included_when_it_has_structure(tmp_path, monkeypatch):
+    corpus = tmp_path / "corpus"
+    corpus.mkdir()
+    paper = corpus / "visual-results.pdf"
+    paper.write_bytes(b"synthetic pdf placeholder")
+    table_rows = "\n".join(f"Table 1 {index} 0.12 0.34 0.56" for index in range(30))
+    figure_rows = "\n".join(f"Figure 2 {index} 1.20 1.30 1.40" for index in range(30))
+    extracted = f"{table_rows}\n{figure_rows}"
+
+    def fake_extract(path, ocr_mode="auto"):
+        assert path == paper
+        assert ocr_mode == "never"
+        return Extraction(extracted, "test-pdf", [], ocr_used=False)
+
+    monkeypatch.setattr(profiles_module, "extract_text", fake_extract)
+    result = build_profile(
+        corpus,
+        "visual-demo",
+        tmp_path,
+        min_characters=200,
+        ocr_mode="never",
+    )
+
+    manifest = json.loads(
+        (
+            tmp_path / ".paper-alchemist" / "profiles" / "visual-demo" / "source-manifest.json"
+        ).read_text(encoding="utf-8")
+    )
+    document = manifest["documents"][0]
+    assert result["documents_included"] == 1
+    assert document["included"] is True
+    assert document["content_mode"] == "figure-or-table-heavy"
+    assert document["ocr_used"] is False
+    assert result["module_samples"]["en"]["results-analysis"] == 1
+
+
+def test_single_language_profile_degrades_without_blocking_generation(tmp_path):
+    corpus = tmp_path / "english-only"
+    corpus.mkdir()
+    shutil.copy(FIXTURES / "corpus" / "english-paper.md", corpus)
+    build_profile(corpus, "english-only", tmp_path, min_characters=200)
+    profile_dir = tmp_path / ".paper-alchemist" / "profiles" / "english-only"
+    complete_semantic_profiles(profile_dir)
+    integrate_profile("english-only", tmp_path)
+
+    brief = build_generation_brief(
+        "english-only",
+        "abstract",
+        "en",
+        "latex",
+        tmp_path,
+        FIXTURES / "paper-context.yaml",
+    )
+    assert brief["bilingual_blend"]["status"] == "degraded-single-language"
+    assert brief["source_counts"] == {"en": 1, "zh": 0}

@@ -20,6 +20,7 @@ ruff check .
 pytest
 python -m build
 paper-alchemist package-skill --output dist
+paper-alchemist validate-skill
 ```
 
 Changes to `skills/paper-alchemist/` must keep `SKILL.md` concise, use only `name` and `description` in its frontmatter, and preserve progressive disclosure through `references/`, `scripts/`, and `assets/`.

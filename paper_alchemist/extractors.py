@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 import shutil
 import subprocess
+import tempfile
 from dataclasses import dataclass
 from hashlib import sha256
 from pathlib import Path
@@ -17,6 +18,7 @@ class Extraction:
     text: str
     backend: str
     warnings: list[str]
+    ocr_used: bool = False
 
 
 def file_sha256(path: Path) -> str:
@@ -43,10 +45,12 @@ def discover_papers(root: Path) -> list[Path]:
     return sorted(papers, key=lambda item: item.as_posix().casefold())
 
 
-def extract_text(path: Path) -> Extraction:
+def extract_text(path: Path, ocr_mode: str = "auto") -> Extraction:
+    if ocr_mode not in {"auto", "never", "always"}:
+        raise ValueError("ocr_mode must be auto, never, or always")
     suffix = path.suffix.casefold()
     if suffix == ".pdf":
-        return _extract_pdf(path)
+        return _extract_pdf(path, ocr_mode)
     if suffix == ".docx":
         return _extract_docx(path)
     if suffix == ".tex":
@@ -56,31 +60,129 @@ def extract_text(path: Path) -> Extraction:
     raise ValueError(f"Unsupported paper format: {path.suffix}")
 
 
-def _extract_pdf(path: Path) -> Extraction:
+def _extract_pdf(path: Path, ocr_mode: str) -> Extraction:
     warnings: list[str] = []
+    text = ""
+    backend = "none"
     executable = shutil.which("pdftotext")
     if executable:
-        completed = subprocess.run(
-            [executable, "-layout", str(path), "-"],
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-            timeout=180,
-            check=False,
-        )
-        if completed.returncode == 0 and completed.stdout.strip():
-            return Extraction(completed.stdout, "pdftotext", warnings)
-        warnings.append(f"pdftotext failed with exit code {completed.returncode}")
-    try:
-        from pypdf import PdfReader
+        try:
+            completed = subprocess.run(
+                [executable, "-layout", str(path), "-"],
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                timeout=180,
+                check=False,
+            )
+            if completed.returncode == 0 and completed.stdout.strip():
+                text = completed.stdout
+                backend = "pdftotext"
+            else:
+                warnings.append(f"pdftotext failed with exit code {completed.returncode}")
+        except subprocess.TimeoutExpired:
+            warnings.append("pdftotext timed out after 180 seconds")
+    if not text.strip():
+        try:
+            from pypdf import PdfReader
 
-        reader = PdfReader(str(path))
-        text = "\n\n".join((page.extract_text() or "") for page in reader.pages)
-        return Extraction(text, "pypdf", warnings)
-    except Exception as exc:  # pragma: no cover - backend-specific failures
-        warnings.append(f"pypdf failed: {exc}")
-        return Extraction("", "none", warnings)
+            reader = PdfReader(str(path))
+            text = "\n\n".join((page.extract_text() or "") for page in reader.pages)
+            backend = "pypdf"
+        except Exception as exc:  # pragma: no cover - backend-specific failures
+            warnings.append(f"pypdf failed: {exc}")
+
+    if _should_ocr(text, ocr_mode):
+        ocr_text, ocr_warnings = _ocr_pdf(path)
+        warnings.extend(ocr_warnings)
+        if ocr_text.strip() and len(ocr_text) > len(text):
+            return Extraction(ocr_text, f"{backend}+tesseract", warnings, ocr_used=True)
+    return Extraction(text, backend, warnings)
+
+
+def _should_ocr(text: str, ocr_mode: str) -> bool:
+    if ocr_mode == "always":
+        return True
+    if ocr_mode == "never":
+        return False
+    return len(text.strip()) < 800
+
+
+def _ocr_pdf(path: Path) -> tuple[str, list[str]]:
+    renderer = shutil.which("pdftoppm")
+    tesseract = shutil.which("tesseract")
+    missing = [
+        name for name, value in (("pdftoppm", renderer), ("tesseract", tesseract)) if not value
+    ]
+    if missing:
+        return "", [f"OCR unavailable; missing tool(s): {', '.join(missing)}"]
+
+    warnings: list[str] = []
+    with tempfile.TemporaryDirectory(prefix="paper-alchemist-ocr-") as temporary:
+        temporary_path = Path(temporary)
+        prefix = temporary_path / "page"
+        try:
+            rendered = subprocess.run(
+                [renderer, "-jpeg", "-r", "200", str(path), str(prefix)],
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                timeout=600,
+                check=False,
+            )
+        except subprocess.TimeoutExpired:
+            return "", ["pdftoppm OCR rendering timed out after 600 seconds"]
+        if rendered.returncode != 0:
+            return "", [f"pdftoppm OCR rendering failed with exit code {rendered.returncode}"]
+        images = sorted(temporary_path.glob("page-*.jpg"))
+        if not images:
+            return "", ["pdftoppm produced no OCR page images"]
+        language = _tesseract_language(tesseract)
+        pages: list[str] = []
+        for page_number, image in enumerate(images, start=1):
+            try:
+                completed = subprocess.run(
+                    [tesseract, str(image), "stdout", "-l", language, "--psm", "3"],
+                    capture_output=True,
+                    text=True,
+                    encoding="utf-8",
+                    errors="replace",
+                    timeout=300,
+                    check=False,
+                )
+            except subprocess.TimeoutExpired:
+                warnings.append(f"tesseract timed out on page {page_number}")
+                continue
+            if completed.returncode == 0:
+                pages.append(completed.stdout)
+            else:
+                warnings.append(
+                    f"tesseract failed on page {page_number} with exit code {completed.returncode}"
+                )
+        return "\n\n".join(pages), warnings
+
+
+def _tesseract_language(executable: str) -> str:
+    completed = subprocess.run(
+        [executable, "--list-langs"],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        timeout=30,
+        check=False,
+    )
+    available = {
+        line.strip()
+        for line in completed.stdout.splitlines()
+        if line.strip() and "available languages" not in line.casefold()
+    }
+    preferred = [language for language in ("eng", "chi_sim") if language in available]
+    if preferred:
+        return "+".join(preferred)
+    return sorted(available)[0] if available else "eng"
 
 
 def _extract_docx(path: Path) -> Extraction:
