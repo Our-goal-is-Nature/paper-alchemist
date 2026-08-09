@@ -147,31 +147,24 @@ For figure/table-heavy PDFs, the corpus may teach how authors introduce, compare
 paper_alchemist/             deterministic Python engine
 skills/paper-alchemist/      portable Agent Skill
 adapters/                    cross-Agent installation manifest
-examples/                    original grounded output examples
-tests/                       original bilingual fixtures and tests
-docs/                        architecture and repository policy
-.github/                     CI and community templates
+.github/workflows/           minimal build and compatibility checks
 ```
 
-Private research data belongs in `.paper-alchemist/`, `papers/`, `corpus/`, or a local `paper-context.yaml`; these paths are ignored by Git. See [repository policy](docs/repository-policy.md).
-
-The implementation-to-plan audit, including later license and figure-PDF decisions, is maintained in [original plan compliance](docs/plan-compliance.md).
+The public repository contains only the installable project. Tests, synthetic fixtures, grounded examples, source papers, extracted text, generated profiles, research contexts, and temporary artifacts stay local and are ignored by Git.
 
 ## Validation
 
-The original English test corpus contained 25 PDFs and one LaTeX paper. The current specified directory has grown to 41 supported candidate files. The latest run included 29 sources, including seven figure/table-heavy PDFs routed to `results-analysis`, and reported 12 exclusions. One low-text PDF requested automatic OCR but remained excluded because Tesseract is not installed in the test WSL environment; that dependency failure was recorded rather than hidden. Real corpus files, caches, and generated test profiles are not published.
-
-Original bilingual fixtures cover language detection, section recognition, reference/appendix removal, hash-based updates, interruption recovery, semantic completion gates, bilingual fallback, citations, installers, and release packaging. See [`examples/`](examples/) for grounded LaTeX and Markdown outputs.
+GitHub Actions checks Python 3.11–3.13 builds, portable Skill structure, packaging, CLI startup, and dry-run installation for all six supported Agents. The full behavioral test suite and research-corpus validation remain local to prevent fixtures, generated profiles, or copyrighted inputs from entering the public project.
 
 ## Development
 
 ```bash
 python -m pip install -e '.[dev]'
-pytest
+ruff check paper_alchemist
+paper-alchemist validate-skill
+python -m build
 paper-alchemist package-skill --output dist
 ```
-
-Read [CONTRIBUTING.md](CONTRIBUTING.md) before proposing a change. Security and privacy reports follow [SECURITY.md](SECURITY.md).
 
 ## License
 

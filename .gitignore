@@ -21,6 +21,8 @@ build/
 *.pdf
 
 # Local-only development artifacts
+/tests/
+/examples/
 /.env
 /.env.*
 /test-artifacts/

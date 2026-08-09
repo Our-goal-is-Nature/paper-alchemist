@@ -4,6 +4,18 @@ All notable changes are documented here.
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-08-09
+
+### Changed
+
+- Reduced the public repository and release archives to the installable engine, portable Skill, Agent adapters, essential project metadata, and minimal CI.
+- Kept test suites, fixtures, and grounded examples local-only.
+- Replaced public pytest execution with build, Skill, CLI, and six-Agent installer smoke checks.
+
+### Removed
+
+- Removed public tests, examples, stage-specific audit documents, and GitHub community templates from the repository and source distribution.
+
 ## [0.2.0] - 2026-08-09
 
 ### Changed
@@ -26,6 +38,7 @@ All notable changes are documented here.
 
 - Initial public release with modular bilingual distillation, grounded generation briefs, six Agent adapters, tests, and release packaging.
 
-[Unreleased]: https://github.com/Wang-Ruibin/paper-alchemist/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/Wang-Ruibin/paper-alchemist/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/Wang-Ruibin/paper-alchemist/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/Wang-Ruibin/paper-alchemist/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/Wang-Ruibin/paper-alchemist/releases/tag/v0.1.0

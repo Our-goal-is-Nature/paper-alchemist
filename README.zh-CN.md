@@ -147,31 +147,24 @@ Paper Alchemist 不会编造贡献、方法、数据集、基线、参数、结�
 paper_alchemist/             确定性 Python 引擎
 skills/paper-alchemist/      可移植 Agent Skill
 adapters/                    跨 Agent 安装清单
-examples/                    原创、事实约束的输出样例
-tests/                       原创中英文 fixtures 与测试
-docs/                        架构和公开仓库策略
-.github/                     CI 与社区模板
+.github/workflows/           最小构建与兼容性检查
 ```
 
-私有研究数据应放在 `.paper-alchemist/`、`papers/`、`corpus/` 或本地 `paper-context.yaml` 中；这些位置默认被 Git 忽略。详细规则见[仓库公开策略](docs/repository-policy.md)。
-
-原计划的逐项实现状态，以及后续许可证和图表型 PDF 决策，见[原计划合规审计](docs/plan-compliance.md)。
+公开仓库只包含可安装的项目主体。测试、原创 fixtures、事实约束样例、论文原文、抽取文本、生成画像、研究上下文和临时产物全部保留在本地，并由 Git 忽略。
 
 ## 验证情况
 
-最初的英文真实测试语料包含 25 个 PDF 和 1 个 LaTeX 文件；当前指定目录已经增长到 41 个受支持的候选文件。最新测试纳入 29 个来源，其中 7 个图表/表格型 PDF 被路由到 `results-analysis`，另有 12 个文件被明确排除。一个低文本 PDF 自动请求了 OCR，但测试 WSL 环境尚未安装 Tesseract，因此仍被排除；该依赖缺失被如实记录，没有静默忽略。真实论文、缓存和测试画像均未公开。
-
-原创双语 fixtures 覆盖语言检测、章节识别、参考文献和附录剔除、哈希更新、中断续跑、语义完成门禁、双语降级、引用、六平台安装和发布构建。可在 [`examples/`](examples/) 查看受事实约束的 LaTeX 与 Markdown 示例。
+GitHub Actions 会在 Python 3.11–3.13 上检查构建、可移植 Skill 结构、打包、CLI 启动和六种 Agent 的安装器 dry-run。完整行为测试与真实论文语料验证仅在本地运行，避免 fixtures、生成画像或受版权保护的输入进入公开项目。
 
 ## 开发
 
 ```bash
 python -m pip install -e '.[dev]'
-pytest
+ruff check paper_alchemist
+paper-alchemist validate-skill
+python -m build
 paper-alchemist package-skill --output dist
 ```
-
-提交修改前请阅读 [CONTRIBUTING.md](CONTRIBUTING.md)。安全和隐私问题请按 [SECURITY.md](SECURITY.md) 报告。
 
 ## 开源协议
 
