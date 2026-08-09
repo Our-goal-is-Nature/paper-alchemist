@@ -12,9 +12,9 @@ def main() -> int:
         from paper_alchemist.cli import main as cli_main
     except ImportError:
         repo_root = Path(__file__).resolve().parents[2]
-        if (repo_root / "paper_alchemist").is_dir():
+        if (repo_root / "engine").is_dir():
             sys.path.insert(0, str(repo_root))
-            from paper_alchemist.cli import main as cli_main
+            from engine.cli import main as cli_main
         else:
             print(
                 "Paper Alchemist Python package is missing. Clone the repository and run "

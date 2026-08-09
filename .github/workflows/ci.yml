@@ -24,7 +24,7 @@ jobs:
           cache: pip
       - run: python -m pip install --upgrade pip
       - run: python -m pip install -e '.[dev]'
-      - run: ruff check paper_alchemist
+      - run: ruff check engine
       - run: paper-alchemist --version
       - run: python -m build
       - run: paper-alchemist validate-skill

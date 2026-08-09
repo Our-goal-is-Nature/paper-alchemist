@@ -144,7 +144,7 @@ Paper Alchemist 不会编造贡献、方法、数据集、基线、参数、结�
 ## 仓库结构
 
 ```text
-paper_alchemist/             确定性 Python 引擎
+engine/                      确定性 Python 引擎源码
 paper-alchemist/             可移植 Agent Skill
 adapters/                    跨 Agent 安装清单
 .github/workflows/           最小构建与兼容性检查
@@ -160,7 +160,7 @@ GitHub Actions 会在 Python 3.11–3.13 上检查构建、可移植 Skill 结�
 
 ```bash
 python -m pip install -e '.[dev]'
-ruff check paper_alchemist
+ruff check engine
 paper-alchemist validate-skill
 python -m build
 paper-alchemist package-skill --output dist

@@ -4,6 +4,13 @@ All notable changes are documented here.
 
 ## [Unreleased]
 
+## [0.2.3] - 2026-08-09
+
+### Changed
+
+- Renamed the Python source directory from `paper_alchemist/` to `engine/` so it is visually distinct from the `paper-alchemist/` Skill directory.
+- Preserved the installed Python import package and CLI name as `paper_alchemist` through an explicit setuptools package mapping.
+
 ## [0.2.2] - 2026-08-09
 
 ### Changed
@@ -45,7 +52,8 @@ All notable changes are documented here.
 
 - Initial public release with modular bilingual distillation, grounded generation briefs, six Agent adapters, tests, and release packaging.
 
-[Unreleased]: https://github.com/Wang-Ruibin/paper-alchemist/compare/v0.2.2...HEAD
+[Unreleased]: https://github.com/Wang-Ruibin/paper-alchemist/compare/v0.2.3...HEAD
+[0.2.3]: https://github.com/Wang-Ruibin/paper-alchemist/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/Wang-Ruibin/paper-alchemist/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/Wang-Ruibin/paper-alchemist/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/Wang-Ruibin/paper-alchemist/compare/v0.1.0...v0.2.0

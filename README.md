@@ -144,7 +144,7 @@ For figure/table-heavy PDFs, the corpus may teach how authors introduce, compare
 ## Repository layout
 
 ```text
-paper_alchemist/             deterministic Python engine
+engine/                      deterministic Python engine source
 paper-alchemist/             portable Agent Skill
 adapters/                    cross-Agent installation manifest
 .github/workflows/           minimal build and compatibility checks
@@ -160,7 +160,7 @@ GitHub Actions checks Python 3.11–3.13 builds, portable Skill structure, packa
 
 ```bash
 python -m pip install -e '.[dev]'
-ruff check paper_alchemist
+ruff check engine
 paper-alchemist validate-skill
 python -m build
 paper-alchemist package-skill --output dist

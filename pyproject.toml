@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "paper-alchemist"
-version = "0.2.2"
+version = "0.2.3"
 description = "Cross-agent bilingual academic writing style distillation toolkit"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -36,8 +36,9 @@ Homepage = "https://github.com/Wang-Ruibin/paper-alchemist"
 Repository = "https://github.com/Wang-Ruibin/paper-alchemist"
 Issues = "https://github.com/Wang-Ruibin/paper-alchemist/issues"
 
-[tool.setuptools.packages.find]
-include = ["paper_alchemist*"]
+[tool.setuptools]
+packages = ["paper_alchemist"]
+package-dir = { paper_alchemist = "engine" }
 
 [tool.setuptools.data-files]
 "share/paper-alchemist/skills/paper-alchemist" = ["paper-alchemist/SKILL.md"]
