@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from hashlib import sha256
-from pathlib import Path
 import re
 import shutil
 import subprocess
+from dataclasses import dataclass
+from hashlib import sha256
+from pathlib import Path
 
 from .constants import DEFAULT_EXCLUDE_NAMES, DEFAULT_EXCLUDE_PARTS, SUPPORTED_EXTENSIONS
 
@@ -113,7 +113,12 @@ def _extract_tex(path: Path) -> str:
     )
     source = re.sub(r"\\(?:label|ref|eqref|url|footnote)\{[^{}]*\}", " ", source)
     source = re.sub(r"\\cite\w*\{([^{}]+)\}", lambda match: f"\\cite{{{match.group(1)}}}", source)
-    source = re.sub(r"\\begin\{(?:figure|table|equation\*?|align\*?)\}.*?\\end\{[^{}]+\}", " ", source, flags=re.S)
+    source = re.sub(
+        r"\\begin\{(?:figure|table|equation\*?|align\*?)\}.*?\\end\{[^{}]+\}",
+        " ",
+        source,
+        flags=re.S,
+    )
     source = re.sub(r"\\[A-Za-z@]+\*?(?:\[[^]]*\])?", " ", source)
     source = source.replace("~", " ").replace("{", "").replace("}", "")
     source = re.sub(r"[ \t]+", " ", source)

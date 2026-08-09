@@ -1,7 +1,9 @@
+# Python and test tooling
 __pycache__/
 *.py[cod]
 *.egg-info/
 .pytest_cache/
+.ruff_cache/
 .coverage
 htmlcov/
 .venv/
@@ -9,6 +11,18 @@ venv/
 dist/
 build/
 *.skill
-.paper-alchemist/cache/
-.paper-alchemist/profiles/
-test-artifacts/
+
+# Private research inputs and generated state
+/.paper-alchemist/
+/paper-context.yaml
+/paper-context.local.yaml
+/papers/
+/corpus/
+*.pdf
+
+# Local-only development artifacts
+/.env
+/.env.*
+/test-artifacts/
+/scratch/
+*.local.md

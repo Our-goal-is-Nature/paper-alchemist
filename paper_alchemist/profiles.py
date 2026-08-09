@@ -2,18 +2,19 @@
 
 from __future__ import annotations
 
+import json
+import re
+import unicodedata
 from collections import defaultdict
 from datetime import datetime, timezone
-import json
+from hashlib import sha256
 from pathlib import Path
-import re
 from statistics import mean
 from typing import Any
-import unicodedata
 
 import yaml
 
-from .constants import MODULES, MODULE_TITLES, PROFILE_HEADINGS
+from .constants import MODULE_TITLES, MODULES, PROFILE_HEADINGS
 from .extractors import discover_papers, extract_text, file_sha256
 from .language import detect_language, language_scores
 from .sections import academic_heading_count, segment_sections, text_statistics
@@ -56,6 +57,7 @@ def build_profile(
     cache_dir.mkdir(parents=True, exist_ok=True)
 
     previous_manifest = _read_json(profile_dir / "source-manifest.json", default={})
+    previous_quality = _read_json(profile_dir / "quality.json", default={})
     previous_by_path = {
         item.get("path"): item
         for item in previous_manifest.get("documents", [])
@@ -75,8 +77,7 @@ def build_profile(
         cached_meta = _read_json(document_cache / "meta.json", default={})
         previous = previous_by_path.get(str(path.resolve()))
         cache_matches = bool(
-            cached_meta.get("sha256") == digest
-            and (document_cache / "full.txt").exists()
+            cached_meta.get("sha256") == digest and (document_cache / "full.txt").exists()
         )
         manifest_matches = bool(previous and previous.get("sha256") == digest)
         # A matching private cache is sufficient for --update. This also lets an
@@ -166,6 +167,7 @@ def build_profile(
     _write_json(profile_dir / "source-manifest.json", manifest)
 
     semantic_refresh: list[str] = []
+    module_fingerprints = _module_fingerprints(module_samples)
     for lang in ("en", "zh"):
         modules_dir = profile_dir / lang / "modules"
         modules_dir.mkdir(parents=True, exist_ok=True)
@@ -175,17 +177,51 @@ def build_profile(
             seed_path = modules_dir / f"{module}.seed.md"
             seed_path.write_text(seed, encoding="utf-8")
             profile_path = modules_dir / f"{module}.md"
-            if not profile_path.exists() or "synthesis_status: pending" in profile_path.read_text(
-                encoding="utf-8", errors="replace"
-            ):
+            previous_fingerprint = (
+                previous_quality.get("module_fingerprints", {}).get(lang, {}).get(module)
+            )
+            fingerprint_changed = bool(
+                update and previous_fingerprint != module_fingerprints[lang][module]
+            )
+            if not profile_path.exists():
                 profile_path.write_text(seed, encoding="utf-8")
-            elif update:
-                semantic_refresh.append(f"{lang}/{module}")
+            else:
+                content = profile_path.read_text(encoding="utf-8", errors="replace")
+                status = _frontmatter(content).get("synthesis_status", "pending")
+                if status == "pending":
+                    profile_path.write_text(seed, encoding="utf-8")
+                elif fingerprint_changed:
+                    profile_path.write_text(
+                        _set_synthesis_status(content, "stale"), encoding="utf-8"
+                    )
+                    semantic_refresh.append(f"{lang}/{module}")
+                elif status == "stale":
+                    semantic_refresh.append(f"{lang}/{module}")
             _write_packets(cache_dir, lang, module, samples)
 
-    quality = _quality_report(slug, documents, module_samples, semantic_refresh)
+    quality = _quality_report(
+        slug,
+        documents,
+        module_samples,
+        semantic_refresh,
+        module_fingerprints,
+    )
+    incomplete_profiles = _incomplete_module_profiles(profile_dir)
+    if incomplete_profiles:
+        _invalidate_integration(profile_dir)
+    else:
+        quality["semantic_synthesis_complete"] = True
+        integration_files = (
+            "en/integrated.md",
+            "zh/integrated.md",
+            "bilingual/cross-lingual.md",
+            "bilingual/conflicts.md",
+        )
+        if all((profile_dir / relative).is_file() for relative in integration_files):
+            quality["integration_status"] = "complete"
+            if previous_quality.get("integrated_at"):
+                quality["integrated_at"] = previous_quality["integrated_at"]
     _write_json(profile_dir / "quality.json", quality)
-    integrate_profile(slug, workspace)
     return {
         "profile": slug,
         "profile_dir": str(profile_dir),
@@ -203,6 +239,13 @@ def integrate_profile(profile: str, workspace: Path) -> dict[str, Any]:
     profile_dir = state_root(workspace) / "profiles" / slug
     if not profile_dir.exists():
         raise FileNotFoundError(f"Profile does not exist: {profile_dir}")
+    incomplete = _incomplete_module_profiles(profile_dir)
+    if incomplete:
+        joined = ", ".join(incomplete)
+        raise ValueError(
+            "Semantic synthesis is incomplete for: "
+            f"{joined}. Complete those module profiles before integration."
+        )
     quality = _read_json(profile_dir / "quality.json", default={})
     for lang in ("en", "zh"):
         integrated = _render_integrated(slug, lang, profile_dir, quality)
@@ -215,6 +258,11 @@ def integrate_profile(profile: str, workspace: Path) -> dict[str, Any]:
     conflicts = _render_conflicts(slug, quality)
     (bilingual / "cross-lingual.md").write_text(cross, encoding="utf-8")
     (bilingual / "conflicts.md").write_text(conflicts, encoding="utf-8")
+    quality["semantic_refresh_required"] = []
+    quality["semantic_synthesis_complete"] = True
+    quality["integration_status"] = "complete"
+    quality["integrated_at"] = utc_now()
+    _write_json(profile_dir / "quality.json", quality)
     return {
         "profile": slug,
         "integrated": [
@@ -231,6 +279,7 @@ def validate_profile(profile: str, workspace: Path) -> dict[str, Any]:
     profile_dir = state_root(workspace) / "profiles" / slug
     errors: list[str] = []
     warnings: list[str] = []
+    pending: list[str] = []
     for required in ("source-manifest.json", "quality.json"):
         if not (profile_dir / required).is_file():
             errors.append(f"missing {required}")
@@ -239,32 +288,49 @@ def validate_profile(profile: str, workspace: Path) -> dict[str, Any]:
             path = profile_dir / lang / "modules" / f"{module}.md"
             if not path.is_file():
                 errors.append(f"missing {lang}/modules/{module}.md")
+                pending.append(f"{lang}/{module}")
                 continue
             content = path.read_text(encoding="utf-8")
             try:
                 metadata = _frontmatter(content)
             except ValueError as exc:
                 errors.append(f"{path}: {exc}")
+                pending.append(f"{lang}/{module}")
                 continue
             for field in ("profile", "language", "module", "source_count", "confidence"):
                 if field not in metadata:
                     errors.append(f"{path}: missing frontmatter field {field}")
             if metadata.get("synthesis_status") != "complete":
-                warnings.append(f"semantic synthesis pending: {lang}/{module}")
+                pending.append(f"{lang}/{module}")
+                warnings.append(f"semantic synthesis incomplete: {lang}/{module}")
             for heading in PROFILE_HEADINGS:
                 if f"## {heading}" not in content:
                     errors.append(f"{path}: missing section {heading}")
             if metadata.get("source_count", 0) < 3:
                 warnings.append(f"low-confidence corpus: {lang}/{module}")
-    for relative in (
+    integration_files = (
         "en/integrated.md",
         "zh/integrated.md",
         "bilingual/cross-lingual.md",
         "bilingual/conflicts.md",
-    ):
-        if not (profile_dir / relative).is_file():
-            errors.append(f"missing {relative}")
-    return {"profile": slug, "valid": not errors, "errors": errors, "warnings": warnings}
+    )
+    integration_present = [
+        relative for relative in integration_files if (profile_dir / relative).is_file()
+    ]
+    if pending and integration_present:
+        warnings.append("integration artifacts are stale while semantic synthesis is incomplete")
+    elif not pending:
+        for relative in integration_files:
+            if not (profile_dir / relative).is_file():
+                errors.append(f"missing {relative}")
+    return {
+        "profile": slug,
+        "valid": not errors,
+        "semantic_complete": not pending,
+        "integration_complete": len(integration_present) == len(integration_files),
+        "errors": errors,
+        "warnings": warnings,
+    }
 
 
 def _render_module_seed(
@@ -293,7 +359,9 @@ def _render_module_seed(
         "synthesis_status": "pending",
     }
     front = yaml.safe_dump(metadata, sort_keys=False, allow_unicode=True).strip()
-    source_list = "\n".join(f"- `{item['source']}`" for item in samples) or "- No qualifying samples."
+    source_list = (
+        "\n".join(f"- `{item['source']}`" for item in samples) or "- No qualifying samples."
+    )
     body = [
         f"---\n{front}\n---",
         f"# {MODULE_TITLES[module][0]} / {MODULE_TITLES[module][1]}",
@@ -348,6 +416,7 @@ def _quality_report(
     documents: list[dict[str, Any]],
     module_samples: dict[str, dict[str, list[dict[str, Any]]]],
     semantic_refresh: list[str],
+    module_fingerprints: dict[str, dict[str, str]],
 ) -> dict[str, Any]:
     sample_counts = {
         lang: {module: len(module_samples[lang].get(module, [])) for module in MODULES}
@@ -359,7 +428,12 @@ def _quality_report(
             stats = [item["statistics"] for item in module_samples[lang].get(module, [])]
             metrics[lang][module] = {
                 key: round(mean(float(value[key]) for value in stats), 2) if stats else 0.0
-                for key in ("average_sentence_length", "citations", "hedges", "first_person_markers")
+                for key in (
+                    "average_sentence_length",
+                    "citations",
+                    "hedges",
+                    "first_person_markers",
+                )
             }
     return {
         "schema_version": 1,
@@ -370,13 +444,70 @@ def _quality_report(
         "documents_excluded": sum(1 for item in documents if not item["included"]),
         "module_samples": sample_counts,
         "metrics": metrics,
+        "module_fingerprints": module_fingerprints,
         "semantic_refresh_required": semantic_refresh,
+        "semantic_synthesis_complete": False,
+        "integration_status": "pending",
         "bilingual_status": (
             "complete"
             if any(sample_counts["en"].values()) and any(sample_counts["zh"].values())
             else "degraded-single-language"
         ),
     }
+
+
+def _module_fingerprints(
+    module_samples: dict[str, dict[str, list[dict[str, Any]]]],
+) -> dict[str, dict[str, str]]:
+    fingerprints: dict[str, dict[str, str]] = {"en": {}, "zh": {}}
+    for lang in ("en", "zh"):
+        for module in MODULES:
+            evidence = []
+            for sample in module_samples[lang].get(module, []):
+                content_hash = sha256(sample["text"].encode("utf-8")).hexdigest()
+                evidence.append(f"{sample['source']}:{content_hash}")
+            payload = "\n".join(sorted(evidence)).encode("utf-8")
+            fingerprints[lang][module] = sha256(payload).hexdigest()
+    return fingerprints
+
+
+def _incomplete_module_profiles(profile_dir: Path) -> list[str]:
+    incomplete: list[str] = []
+    for lang in ("en", "zh"):
+        for module in MODULES:
+            path = profile_dir / lang / "modules" / f"{module}.md"
+            if not path.is_file():
+                incomplete.append(f"{lang}/{module} (missing)")
+                continue
+            try:
+                status = _frontmatter(path.read_text(encoding="utf-8")).get("synthesis_status")
+            except ValueError:
+                status = None
+            if status != "complete":
+                incomplete.append(f"{lang}/{module} ({status or 'invalid'})")
+    return incomplete
+
+
+def _set_synthesis_status(content: str, status: str) -> str:
+    updated, replacements = re.subn(
+        r"(?m)^synthesis_status:\s*[^\n]+$",
+        f"synthesis_status: {status}",
+        content,
+        count=1,
+    )
+    if replacements != 1:
+        raise ValueError("module profile is missing synthesis_status frontmatter")
+    return updated
+
+
+def _invalidate_integration(profile_dir: Path) -> None:
+    for relative in (
+        "en/integrated.md",
+        "zh/integrated.md",
+        "bilingual/cross-lingual.md",
+        "bilingual/conflicts.md",
+    ):
+        (profile_dir / relative).unlink(missing_ok=True)
 
 
 def _render_integrated(

@@ -65,6 +65,8 @@ paper-alchemist integrate --profile <name>
 paper-alchemist validate-profile --profile <name>
 ```
 
+`integrate` must refuse any module whose `synthesis_status` is `pending`, `stale`, missing, or invalid. Complete the listed modules and retry; never treat the quantitative seed as a semantic profile.
+
 Review and refine the generated files:
 
 - `en/integrated.md`
@@ -77,6 +79,8 @@ Align only high-level functions across languages. Keep target-language surface c
 ## Update an existing profile
 
 Run `distill ... --update`. Unchanged documents reuse cached extraction. Changed and new documents are reprocessed. Read `semantic_refresh_required` in the command result and re-synthesize those module profiles before integration.
+
+The CLI fingerprints evidence per language and module. It preserves completed profiles and integration artifacts when the relevant evidence is unchanged, and marks affected profiles `stale` when evidence changes.
 
 Never overwrite a completed semantic profile with a quantitative seed without reviewing it.
 

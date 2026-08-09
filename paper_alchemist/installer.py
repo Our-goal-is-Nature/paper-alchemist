@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import os
-from pathlib import Path
 import shutil
 import sys
+from dataclasses import dataclass
+from pathlib import Path
+
 import yaml
 
 from .constants import OPERATIONS
@@ -85,7 +86,9 @@ def install(
     if agent == "codex":
         notes.append("Invoke with $paper-alchemist followed by the operation and arguments.")
     else:
-        notes.append("Native slash wrappers were installed for distill, integrate, and section drafting.")
+        notes.append(
+            "Native slash wrappers were installed for distill, integrate, and section drafting."
+        )
     return InstallResult(agent, scope, installed, notes, dry_run)
 
 
@@ -139,14 +142,22 @@ def _targets(
             "opencode",
         )
     if agent == "hermes":
-        return home / ".hermes" / "skills" / "paper-alchemist", home / ".hermes" / "skills", "hermes"
+        return (
+            home / ".hermes" / "skills" / "paper-alchemist",
+            home / ".hermes" / "skills",
+            "hermes",
+        )
     if agent == "pi":
         return (
             home / ".pi" / "agent" / "skills" / "paper-alchemist",
             home / ".pi" / "agent" / "prompts",
             "pi",
         )
-    return home / ".kimi-code" / "skills" / "paper-alchemist", home / ".kimi-code" / "skills", "kimi"
+    return (
+        home / ".kimi-code" / "skills" / "paper-alchemist",
+        home / ".kimi-code" / "skills",
+        "kimi",
+    )
 
 
 def _prompt_wrapper(agent: str, operation: str) -> str:
@@ -169,8 +180,7 @@ def _skill_wrapper(agent: str, operation: str) -> str:
     kimi_arguments = ""
     if agent == "kimi":
         kimi_fields = (
-            "type: prompt\n"
-            f"whenToUse: Execute the Paper Alchemist {operation} operation\n"
+            f"type: prompt\nwhenToUse: Execute the Paper Alchemist {operation} operation\n"
         )
         kimi_arguments = "\nUser arguments: $ARGUMENTS\n"
     return (
@@ -189,7 +199,9 @@ def _skill_wrapper(agent: str, operation: str) -> str:
 
 def _copy_directory(source: Path, target: Path, force: bool, dry_run: bool) -> None:
     if target.exists() and not force:
-        raise FileExistsError(f"Install target already exists: {target}. Pass --force to replace it.")
+        raise FileExistsError(
+            f"Install target already exists: {target}. Pass --force to replace it."
+        )
     if dry_run:
         return
     if target.exists():

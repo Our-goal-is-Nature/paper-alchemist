@@ -2,15 +2,17 @@
 
 from __future__ import annotations
 
-from collections import defaultdict
 import re
+from collections import defaultdict
 from statistics import mean
 
 from .constants import MODULES
 
 _HEADING_PREFIX = re.compile(r"^\s*(?:#{1,6}\s+|(?:\d+(?:\.\d+)*)[.)]?\s+)?(.{2,120}?)\s*$")
 _SENTENCE_SPLIT = re.compile(r"(?<=[.!?。！？])\s*")
-_CITATION_RE = re.compile(r"(?:\\cite\w*\{[^}]+\}|\[[0-9,;\-\s]+\]|\([A-Z][A-Za-z-]+(?:\s+et al\.)?,?\s+\d{4}\))")
+_CITATION_RE = re.compile(
+    r"(?:\\cite\w*\{[^}]+\}|\[[0-9,;\-\s]+\]|\([A-Z][A-Za-z-]+(?:\s+et al\.)?,?\s+\d{4}\))"
+)
 
 _ALIASES: dict[str, tuple[str, ...]] = {
     "abstract": ("abstract", "summary", "摘要", "摘 要"),
@@ -118,7 +120,11 @@ def classify_heading(raw: str) -> str | None:
     for module, aliases in _ALIASES.items():
         for alias in aliases:
             key = alias.casefold()
-            if normalized == key or normalized.startswith(key + ":") or normalized.startswith(key + " "):
+            if (
+                normalized == key
+                or normalized.startswith(key + ":")
+                or normalized.startswith(key + " ")
+            ):
                 return module
     if re.search(r"\b(?:instance|benchmark|parameter)s?\b", normalized) and re.search(
         r"\b(?:setup|setting|configuration|design|implementation|tuning)s?\b", normalized
@@ -150,10 +156,7 @@ def looks_like_heading(line: str) -> str | None:
     known = classify_heading(plain)
     has_cjk = bool(re.search(r"[\u3400-\u9fff]", plain))
     letters = re.sub(r"[^A-Za-z]", "", plain)
-    visibly_styled = bool(
-        has_cjk
-        or (letters and (letters.isupper() or plain.istitle()))
-    )
+    visibly_styled = bool(has_cjk or (letters and (letters.isupper() or plain.istitle())))
     if known and (markdown or numbered or visibly_styled):
         return known
     match = _HEADING_PREFIX.match(candidate)
@@ -235,7 +238,13 @@ def text_statistics(text: str, language: str) -> dict[str, float | int]:
     else:
         sentence_lengths = [len(re.findall(r"\b[\w'-]+\b", s)) for s in sentences]
     citation_count = len(_CITATION_RE.findall(text))
-    hedges = len(re.findall(r"\b(?:may|might|could|suggests?|indicates?|approximately|typically)\b|可能|表明|大约|通常", text, re.I))
+    hedges = len(
+        re.findall(
+            r"\b(?:may|might|could|suggests?|indicates?|approximately|typically)\b|可能|表明|大约|通常",
+            text,
+            re.I,
+        )
+    )
     first_person = len(re.findall(r"\b(?:we|our)\b|本文|我们", text, re.I))
     return {
         "characters": len(text),

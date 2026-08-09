@@ -3,7 +3,6 @@ from pathlib import Path
 
 import yaml
 
-
 ROOT = Path(__file__).parents[1]
 EXAMPLES = ROOT / "examples"
 
@@ -17,7 +16,11 @@ def test_requested_generation_examples_exist_in_both_formats():
         "results-analysis-en.md",
         "results-analysis-zh.tex",
     }
-    assert expected == {path.name for path in EXAMPLES.iterdir() if path.suffix in {".md", ".tex"} and path.name != "README.md"}
+    assert expected == {
+        path.name
+        for path in EXAMPLES.iterdir()
+        if path.suffix in {".md", ".tex"} and path.name != "README.md"
+    }
     assert all((EXAMPLES / name).read_text(encoding="utf-8").strip() for name in expected)
 
 

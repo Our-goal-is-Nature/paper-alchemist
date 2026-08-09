@@ -53,5 +53,6 @@ Keep English and Chinese evidence separate during extraction and module distilla
 ## Validate completion
 
 - Run `paper-alchemist validate-profile --profile <name>` after distillation or integration.
+- Treat `pending` and `stale` module profiles as incomplete. Never bypass the integration or generation gate.
 - Confirm every used profile path and source count from the generation brief.
 - Report target language, secondary language, bilingual status, output format, and any missing or degraded evidence with the result.

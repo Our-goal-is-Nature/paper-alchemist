@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 import argparse
-from dataclasses import asdict
 import json
-from pathlib import Path
 import sys
+from dataclasses import asdict
+from pathlib import Path
 from typing import Any
 
 from . import __version__
@@ -37,7 +37,9 @@ def parser() -> argparse.ArgumentParser:
     integrate.add_argument("--profile", required=True)
     integrate.add_argument("--workspace", type=Path, default=Path.cwd())
 
-    validate = sub.add_parser("validate-profile", help="Validate a profile's structure and confidence")
+    validate = sub.add_parser(
+        "validate-profile", help="Validate a profile's structure and confidence"
+    )
     validate.add_argument("--profile", required=True)
     validate.add_argument("--workspace", type=Path, default=Path.cwd())
 
@@ -99,7 +101,12 @@ def main(argv: list[str] | None = None) -> int:
             if args.out:
                 args.out.parent.mkdir(parents=True, exist_ok=True)
                 args.out.write_text(rendered, encoding="utf-8")
-                _print_json({"brief": str(args.out), "missing_context_fields": result["missing_context_fields"]})
+                _print_json(
+                    {
+                        "brief": str(args.out),
+                        "missing_context_fields": result["missing_context_fields"],
+                    }
+                )
             else:
                 print(rendered, end="")
         elif args.command == "install":

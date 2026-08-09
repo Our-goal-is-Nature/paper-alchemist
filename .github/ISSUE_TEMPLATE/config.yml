@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Sensitive security or privacy report
+    url: https://github.com/Wang-Ruibin/paper-alchemist/security/advisories/new
+    about: Report vulnerabilities without exposing private research data.

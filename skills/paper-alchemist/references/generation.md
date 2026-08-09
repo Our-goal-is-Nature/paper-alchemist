@@ -24,6 +24,8 @@ For a custom section, use module `section` and add `--section-name <name>`.
 
 Read every path in `profile_files`. Use the target module first, the secondary-language module second, the target integrated profile third, and the cross-lingual profile fourth. Consult `conflicts.md` before choosing surface wording.
 
+If the CLI reports an incomplete semantic profile or missing integration artifact, stop. Finish distillation and integration before asking the user for research facts or drafting prose.
+
 ## Fill missing research facts
 
 Inspect `missing_context_fields` in the brief. If it is non-empty, ask the user only for those facts. Accept answers interactively and treat them as an in-session extension of the context file. Do not draft until the required facts are available.

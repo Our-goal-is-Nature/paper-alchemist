@@ -38,6 +38,29 @@ def build_generation_brief(
     target_module = module if module != "section" else "methodology"
     target_path = profile_dir / language / "modules" / f"{target_module}.md"
     secondary_path = profile_dir / secondary / "modules" / f"{target_module}.md"
+    required_profiles = {
+        f"{language}/{target_module}": target_path,
+        f"{secondary}/{target_module}": secondary_path,
+    }
+    incomplete = [
+        label for label, path in required_profiles.items() if _synthesis_status(path) != "complete"
+    ]
+    if incomplete:
+        raise ValueError(
+            "Generation requires completed semantic module profiles. Incomplete: "
+            + ", ".join(incomplete)
+        )
+    integration_paths = (
+        profile_dir / language / "integrated.md",
+        profile_dir / "bilingual" / "cross-lingual.md",
+        profile_dir / "bilingual" / "conflicts.md",
+    )
+    missing_integration = [str(path) for path in integration_paths if not path.is_file()]
+    if missing_integration:
+        raise ValueError(
+            "Generation requires an integrated profile. Run `paper-alchemist integrate` "
+            "after semantic synthesis. Missing: " + ", ".join(missing_integration)
+        )
     target_count = _source_count(target_path)
     secondary_count = _source_count(secondary_path)
     degraded = target_count == 0 or secondary_count == 0
@@ -101,3 +124,19 @@ def _source_count(path: Path) -> int:
         return int(metadata.get("source_count", 0))
     except (TypeError, ValueError):
         return 0
+
+
+def _synthesis_status(path: Path) -> str | None:
+    if not path.is_file():
+        return None
+    content = path.read_text(encoding="utf-8", errors="replace")
+    if not content.startswith("---"):
+        return None
+    parts = content.split("---", 2)
+    if len(parts) < 3:
+        return None
+    metadata = yaml.safe_load(parts[1]) or {}
+    if not isinstance(metadata, dict):
+        return None
+    value = metadata.get("synthesis_status")
+    return str(value) if value is not None else None

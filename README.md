@@ -1,22 +1,45 @@
+<div align="center">
+
 # Paper Alchemist
 
-Paper Alchemist is a model-agnostic [Agent Skills](https://agentskills.io/) package for distilling corpus-level academic writing patterns and drafting evidence-grounded paper sections. It keeps English and Chinese profiles separate during analysis, then blends both during generation with the target language dominant (approximately 70/30).
+### Distill how great papers write. Draft with evidence, not invention.
 
-It does **not** call an LLM API. Local Python code handles extraction, sectioning, statistics, manifests, and validation; the active Agent performs semantic synthesis and writing.
+A model-agnostic Agent Skill for modular, bilingual academic-writing distillation and grounded paper drafting.
 
-## Features
+[![CI](https://github.com/Wang-Ruibin/paper-alchemist/actions/workflows/ci.yml/badge.svg)](https://github.com/Wang-Ruibin/paper-alchemist/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/Wang-Ruibin/paper-alchemist)](https://github.com/Wang-Ruibin/paper-alchemist/releases)
+[![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![Agent Skills](https://img.shields.io/badge/Agent%20Skills-compatible-6f42c1)](https://agentskills.io/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-- Recursively processes PDF, LaTeX, DOCX, Markdown, and text papers.
-- Recognizes abstract, introduction, related work, problem definition, methodology, experiment setup, results analysis, and conclusion modules.
-- Produces separate English and Chinese profiles plus cross-lingual integration and conflict reports.
-- Uses `paper-context.yaml` as the factual boundary and asks interactively for missing module-specific facts.
-- Generates LaTeX or Markdown without inventing results, significance, contributions, or citations.
-- Installs native adapters for Codex, Claude Code, OpenCode, Hermes, Pi Agent, and Kimi Code.
-- Keeps extracted paper text in a gitignored local cache.
+**English** · [简体中文](README.zh-CN.md)
 
-## Install
+</div>
 
-Python 3.11 or newer is required. `pdftotext` is recommended; `pypdf` is used as the fallback.
+## Why Paper Alchemist?
+
+Academic corpora can teach an Agent **how to write**: how an abstract moves from problem to evidence, how an introduction places its gap, or how a results section separates observation from interpretation. They must never be treated as evidence for **what is true** about your research.
+
+Paper Alchemist keeps those responsibilities separate:
+
+- local Python extracts, sections, hashes, measures, and validates papers;
+- the active Agent distills corpus-level writing patterns and drafts prose;
+- `paper-context.yaml` and explicit user answers are the only factual sources;
+- no bundled script calls an LLM API;
+- no single author is imitated and no long source passage is retained in a profile.
+
+## Highlights
+
+- **Modular distillation** — separate profiles for abstract, introduction, related work, problem definition, methodology, experiment setup, results analysis, and conclusion.
+- **Bilingual by design** — preserve English and Chinese evidence separately, then blend both during generation; the target writing language leads at roughly 70/30.
+- **Grounded generation** — block drafting until semantic profiles are complete, report missing research facts, and allow only declared citation keys.
+- **Incremental and resumable** — reuse hash-matched extraction caches and invalidate only profiles affected by corpus changes.
+- **Cross-Agent** — one open Agent Skill with adapters for Codex, Claude Code, OpenCode, Hermes, Pi Agent, and Kimi Code.
+- **Private by default** — source papers, extracted text, research context, and generated profiles remain outside version control.
+
+## 60-second start
+
+Python 3.11 or newer is required. `pdftotext` is recommended for PDFs; `pypdf` is the fallback.
 
 ```bash
 git clone https://github.com/Wang-Ruibin/paper-alchemist.git
@@ -26,83 +49,112 @@ python -m venv .venv
 python -m pip install -e .
 ```
 
-Install the skill for one Agent:
+Install for your Agent:
 
 ```bash
 paper-alchemist install --agent codex --scope user
-paper-alchemist install --agent claude --scope project
-paper-alchemist install --agent opencode --scope project
-paper-alchemist install --agent hermes --scope user
-paper-alchemist install --agent pi --scope user
-paper-alchemist install --agent kimi --scope user
+# agents: codex | claude | opencode | hermes | pi | kimi
+# scopes: user | project
 ```
 
-Use `--dry-run` to inspect destinations and `--force` only when intentionally replacing an existing installation.
-
-## Distill a corpus
-
-From the research project where the local profile should live:
+Distill a paper folder:
 
 ```bash
-paper-alchemist distill /path/to/papers --profile routing-literature --language auto
+paper-alchemist distill ./papers --profile routing-literature --language auto
 ```
 
-The command prepares private packets in `.paper-alchemist/cache/` and seed profiles in `.paper-alchemist/profiles/`. Invoke the installed `paper-alchemist` skill and ask the Agent to finish `distill`; the skill directs it to review packets, complete semantic module profiles, integrate the languages, and validate the result.
-
-Refresh an existing profile without re-extracting unchanged papers:
+Ask the installed Skill to finish semantic distillation, then integrate:
 
 ```bash
-paper-alchemist distill /path/to/papers --profile routing-literature --language auto --update
+paper-alchemist integrate --profile routing-literature
+paper-alchemist validate-profile --profile routing-literature
 ```
 
-## Draft a section
-
-Copy the context template and fill only verified facts:
-
-```bash
-cp skills/paper-alchemist/assets/paper-context.example.yaml paper-context.yaml
-```
-
-Examples by platform:
-
-| Agent | Example |
-|---|---|
-| Codex | `$paper-alchemist abstract profile=routing-literature lang=en format=latex context=paper-context.yaml` |
-| Claude Code | `/abstract profile=routing-literature lang=en format=latex context=paper-context.yaml` |
-| OpenCode | `/abstract profile=routing-literature lang=en format=latex context=paper-context.yaml` |
-| Hermes | `/abstract profile=routing-literature lang=en format=latex context=paper-context.yaml` |
-| Pi Agent | `/abstract profile=routing-literature lang=en format=latex context=paper-context.yaml` |
-| Kimi Code | `/skill:abstract profile=routing-literature lang=en format=latex context=paper-context.yaml` |
-
-The target language controls grammar, terminology, voice, and citation punctuation. The secondary language contributes transferable rhetorical structure. If one language is absent, generation continues with an explicit degraded-confidence notice.
-
-See [`examples/`](examples/) for original English and Chinese abstract, experiment-setup, and results-analysis outputs in both LaTeX and Markdown. Every example is bounded by its accompanying context file.
-
-## CLI reference
+Draft an abstract through the Agent:
 
 ```text
-paper-alchemist distill SOURCE --profile NAME [--language auto|en|zh] [--update]
-paper-alchemist integrate --profile NAME
-paper-alchemist validate-profile --profile NAME
-paper-alchemist brief MODULE --profile NAME --language en|zh --format latex|markdown [--context FILE]
-paper-alchemist install --agent AGENT --scope user|project [--dry-run]
-paper-alchemist package-skill --output dist
+/abstract profile=routing-literature lang=en format=latex context=paper-context.yaml
 ```
 
-The CLI prepares a generation brief; the active Agent writes the section. Omitting a context file is supported, but the Agent must obtain required facts interactively before drafting.
+## How it works
 
-## 中文说明
+```mermaid
+flowchart LR
+    A[PDF / LaTeX / DOCX / Markdown / TXT] --> B[Local extraction and sectioning]
+    B --> C[Private bilingual packets]
+    C --> D[Agent semantic synthesis by module]
+    D --> E[English and Chinese profiles]
+    E --> F[Cross-lingual integration]
+    G[Verified paper-context.yaml] --> H[Grounded section drafting]
+    F --> H
+```
 
-Paper Alchemist 将中文和英文论文分别蒸馏为模块化画像，再在生成阶段同时借鉴两种语言。目标写作语言约占 70%：它决定自然措辞、语法、术语和引用格式；另一语言约占 30%：只迁移问题铺垫、研究缺口、贡献排序、实验论证链等高层写法。
+1. `distill` discovers papers, extracts text, removes references and appendices, detects language, segments modules, and creates private evidence packets.
+2. The active Agent reviews packets and replaces quantitative seeds with aggregate semantic findings.
+3. `integrate` refuses incomplete or stale module profiles, then builds English, Chinese, cross-lingual, and conflict profiles.
+4. A section command builds a generation brief, checks required facts and citations, and drafts in the requested language and format.
 
-论文语料只回答“如何写”，`paper-context.yaml` 和用户明确提供的信息才回答“研究事实是什么”。Skill 禁止自行编造贡献、方法、实验数字、统计显著性和引用。
+## Commands
 
-## Privacy and copyright
+| Command | Purpose |
+|---|---|
+| `distill SOURCE --profile NAME --language auto\|en\|zh` | Extract and partition a corpus |
+| `integrate --profile NAME` | Integrate completed semantic profiles |
+| `validate-profile --profile NAME` | Report structural, semantic, confidence, and integration status |
+| `brief MODULE --profile NAME --language en\|zh` | Build a grounded bilingual drafting brief |
+| `install --agent AGENT --scope user\|project` | Install the core Skill and native wrappers |
+| `package-skill --output dist` | Build `paper-alchemist.skill` |
 
-- Source papers are never copied into the skill or public repository.
-- Extracted text remains under `.paper-alchemist/cache/`, which is ignored by Git.
-- Profiles record aggregate patterns and source counts, not long quotations or author imitation.
-- Scanned, corrupt, password-protected, low-text, and structurally unrecognized files are reported rather than silently treated as evidence.
+Section operations:
+
+`abstract` · `introduction` · `related-work` · `problem-definition` · `methodology` · `experiment-setup` · `results-analysis` · `conclusion` · `section`
+
+## Agent support
+
+| Agent | Installed entry point |
+|---|---|
+| Codex | `$paper-alchemist abstract ...` |
+| Claude Code | `/abstract ...` |
+| OpenCode | `/abstract ...` |
+| Hermes | `/abstract ...` |
+| Pi Agent | `/abstract ...` |
+| Kimi Code | `/skill:abstract ...` |
+
+See [platform details](skills/paper-alchemist/references/platforms.md) for user/project paths and native behavior.
+
+## Evidence and language contract
+
+Generation applies this priority:
+
+1. target-language module profile;
+2. secondary-language module profile;
+3. target-language integrated profile;
+4. cross-lingual structure profile;
+5. factual and academic-writing constraints.
+
+The secondary language contributes rhetorical function and information organization—not translated surface syntax. If either language has no valid evidence, generation continues with an explicit low-confidence, single-language fallback.
+
+Paper Alchemist never invents contributions, methods, datasets, baselines, parameters, results, significance, limitations, or citations. LaTeX uses `\cite{key}`; Markdown uses only the citation convention and keys declared in the context.
+
+## Repository layout
+
+```text
+paper_alchemist/             deterministic Python engine
+skills/paper-alchemist/      portable Agent Skill
+adapters/                    cross-Agent installation manifest
+examples/                    original grounded output examples
+tests/                       original bilingual fixtures and tests
+docs/                        architecture and repository policy
+.github/                     CI and community templates
+```
+
+Private research data belongs in `.paper-alchemist/`, `papers/`, `corpus/`, or a local `paper-context.yaml`; these paths are ignored by Git. See [repository policy](docs/repository-policy.md).
+
+## Validation
+
+The original English test corpus contained 25 PDFs and one LaTeX paper. The extraction run discovered all 26 files, included 22 structured papers, and explicitly excluded four low-text or structurally insufficient files. Real corpus files, caches, and generated test profiles are not published.
+
+Original bilingual fixtures cover language detection, section recognition, reference/appendix removal, hash-based updates, interruption recovery, semantic completion gates, bilingual fallback, citations, installers, and release packaging. See [`examples/`](examples/) for grounded LaTeX and Markdown outputs.
 
 ## Development
 
@@ -112,4 +164,8 @@ pytest
 paper-alchemist package-skill --output dist
 ```
 
-Licensed under Apache-2.0.
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before proposing a change. Security and privacy reports follow [SECURITY.md](SECURITY.md).
+
+## License
+
+MIT © 2026 [misakimei0331](https://github.com/misakimei0331). See [LICENSE](LICENSE).

@@ -7,9 +7,14 @@ from typing import Any
 
 import yaml
 
-
 MODULE_REQUIREMENTS: dict[str, tuple[str, ...]] = {
-    "abstract": ("research.problem", "research.gap", "research.contributions", "research.method", "research.results"),
+    "abstract": (
+        "research.problem",
+        "research.gap",
+        "research.contributions",
+        "research.method",
+        "research.results",
+    ),
     "introduction": ("research.problem", "research.gap", "research.contributions"),
     "related-work": ("research.gap", "citations"),
     "problem-definition": ("research.problem",),

@@ -20,6 +20,14 @@ confidence: high
 synthesis_status: complete
 ```
 
+Status values:
+
+- `pending`: deterministic seed exists, but Agent semantic synthesis has not been completed;
+- `stale`: the underlying module evidence changed after the last synthesis;
+- `complete`: semantic findings match the current module evidence.
+
+Only `complete` profiles may be integrated or used for generation.
+
 Keep these H2 headings exactly:
 
 1. `Rhetorical moves`

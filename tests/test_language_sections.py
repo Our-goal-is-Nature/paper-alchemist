@@ -3,7 +3,6 @@ from pathlib import Path
 from paper_alchemist.language import detect_language
 from paper_alchemist.sections import looks_like_heading, segment_sections, text_statistics
 
-
 FIXTURES = Path(__file__).parent / "fixtures" / "corpus"
 
 
@@ -37,9 +36,15 @@ def test_statistics_are_language_aware():
 
 
 def test_two_column_and_descriptive_headings_are_recognized():
-    assert looks_like_heading("1. Introduction                    text in the other column") == "introduction"
+    assert (
+        looks_like_heading("1. Introduction                    text in the other column")
+        == "introduction"
+    )
     assert looks_like_heading("3. A biased random-key genetic algorithm") == "methodology"
-    assert looks_like_heading("5.1. Benchmark instances and experimental configurations") == "experiment-setup"
+    assert (
+        looks_like_heading("5.1. Benchmark instances and experimental configurations")
+        == "experiment-setup"
+    )
     assert looks_like_heading("algorithm") is None
 
 
