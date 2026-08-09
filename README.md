@@ -123,7 +123,7 @@ Section operations:
 | Pi Agent | `/abstract ...` |
 | Kimi Code | `/skill:abstract ...` |
 
-See [platform details](skills/paper-alchemist/references/platforms.md) for user/project paths and native behavior.
+See [platform details](paper-alchemist/references/platforms.md) for user/project paths and native behavior.
 
 ## Evidence and language contract
 
@@ -145,7 +145,7 @@ For figure/table-heavy PDFs, the corpus may teach how authors introduce, compare
 
 ```text
 paper_alchemist/             deterministic Python engine
-skills/paper-alchemist/      portable Agent Skill
+paper-alchemist/             portable Agent Skill
 adapters/                    cross-Agent installation manifest
 .github/workflows/           minimal build and compatibility checks
 ```

@@ -3,7 +3,7 @@ include README.md
 include README.zh-CN.md
 include CHANGELOG.md
 include adapters/manifest.yaml
-recursive-include skills/paper-alchemist *
+recursive-include paper-alchemist *
 prune tests
 prune examples
 global-exclude __pycache__ *.py[cod]

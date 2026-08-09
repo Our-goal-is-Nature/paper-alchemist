@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "paper-alchemist"
-version = "0.2.1"
+version = "0.2.2"
 description = "Cross-agent bilingual academic writing style distillation toolkit"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -40,16 +40,16 @@ Issues = "https://github.com/Wang-Ruibin/paper-alchemist/issues"
 include = ["paper_alchemist*"]
 
 [tool.setuptools.data-files]
-"share/paper-alchemist/skills/paper-alchemist" = ["skills/paper-alchemist/SKILL.md"]
-"share/paper-alchemist/skills/paper-alchemist/agents" = ["skills/paper-alchemist/agents/openai.yaml"]
-"share/paper-alchemist/skills/paper-alchemist/assets" = ["skills/paper-alchemist/assets/paper-context.example.yaml"]
+"share/paper-alchemist/skills/paper-alchemist" = ["paper-alchemist/SKILL.md"]
+"share/paper-alchemist/skills/paper-alchemist/agents" = ["paper-alchemist/agents/openai.yaml"]
+"share/paper-alchemist/skills/paper-alchemist/assets" = ["paper-alchemist/assets/paper-context.example.yaml"]
 "share/paper-alchemist/skills/paper-alchemist/references" = [
-  "skills/paper-alchemist/references/generation.md",
-  "skills/paper-alchemist/references/platforms.md",
-  "skills/paper-alchemist/references/schemas.md",
-  "skills/paper-alchemist/references/workflow.md",
+  "paper-alchemist/references/generation.md",
+  "paper-alchemist/references/platforms.md",
+  "paper-alchemist/references/schemas.md",
+  "paper-alchemist/references/workflow.md",
 ]
-"share/paper-alchemist/skills/paper-alchemist/scripts" = ["skills/paper-alchemist/scripts/run.py"]
+"share/paper-alchemist/skills/paper-alchemist/scripts" = ["paper-alchemist/scripts/run.py"]
 
 [tool.ruff]
 target-version = "py311"

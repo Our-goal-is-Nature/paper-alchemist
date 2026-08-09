@@ -30,7 +30,7 @@ def find_skill_source() -> Path:
         candidates = [Path(override).expanduser().resolve()]
     else:
         candidates = [
-            Path(__file__).resolve().parents[1] / "skills" / "paper-alchemist",
+            Path(__file__).resolve().parents[1] / "paper-alchemist",
             Path(sys.prefix) / "share" / "paper-alchemist" / "skills" / "paper-alchemist",
         ]
     for candidate in candidates:

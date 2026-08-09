@@ -123,7 +123,7 @@ flowchart LR
 | Pi Agent | `/abstract ...` |
 | Kimi Code | `/skill:abstract ...` |
 
-用户级、项目级目录和各平台原生行为见[平台说明](skills/paper-alchemist/references/platforms.md)。
+用户级、项目级目录和各平台原生行为见[平台说明](paper-alchemist/references/platforms.md)。
 
 ## 双语与事实边界
 
@@ -145,7 +145,7 @@ Paper Alchemist 不会编造贡献、方法、数据集、基线、参数、结�
 
 ```text
 paper_alchemist/             确定性 Python 引擎
-skills/paper-alchemist/      可移植 Agent Skill
+paper-alchemist/             可移植 Agent Skill
 adapters/                    跨 Agent 安装清单
 .github/workflows/           最小构建与兼容性检查
 ```

@@ -11,7 +11,7 @@ def main() -> int:
     try:
         from paper_alchemist.cli import main as cli_main
     except ImportError:
-        repo_root = Path(__file__).resolve().parents[3]
+        repo_root = Path(__file__).resolve().parents[2]
         if (repo_root / "paper_alchemist").is_dir():
             sys.path.insert(0, str(repo_root))
             from paper_alchemist.cli import main as cli_main

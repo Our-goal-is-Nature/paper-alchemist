@@ -4,6 +4,13 @@ All notable changes are documented here.
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-08-09
+
+### Changed
+
+- Flattened the source Skill path from `skills/paper-alchemist/` to the root-level `paper-alchemist/` directory.
+- Updated source discovery, packaging metadata, validation defaults, documentation, and local tests for the new path.
+
 ## [0.2.1] - 2026-08-09
 
 ### Changed
@@ -38,7 +45,8 @@ All notable changes are documented here.
 
 - Initial public release with modular bilingual distillation, grounded generation briefs, six Agent adapters, tests, and release packaging.
 
-[Unreleased]: https://github.com/Wang-Ruibin/paper-alchemist/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/Wang-Ruibin/paper-alchemist/compare/v0.2.2...HEAD
+[0.2.2]: https://github.com/Wang-Ruibin/paper-alchemist/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/Wang-Ruibin/paper-alchemist/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/Wang-Ruibin/paper-alchemist/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/Wang-Ruibin/paper-alchemist/releases/tag/v0.1.0

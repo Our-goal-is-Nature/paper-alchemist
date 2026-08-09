@@ -79,7 +79,7 @@ def parser() -> argparse.ArgumentParser:
         "path",
         nargs="?",
         type=Path,
-        default=Path("skills/paper-alchemist"),
+        default=Path("paper-alchemist"),
     )
     return root
 
