@@ -28,7 +28,11 @@ Paper Alchemist learns how different sections of reference papers organize ideas
 
 Reference papers provide experience about how to write. Your drafts, experiment records, and answers provide the facts to write about.
 
-## 60-second start
+## Supported Agents
+
+Paper Alchemist supports Codex, Claude Code, OpenCode, Hermes, Pi Agent, and Kimi Code. After installation, describe the papers you want to distill or the section you want to draft.
+
+## From installation to writing
 
 The entire workflow can be completed by talking to your Agent. You do not need to learn commands or prepare configuration files by hand.
 
@@ -140,10 +144,6 @@ Your research materials do not need a fixed format. Provide file paths or answer
 - Paper Alchemist does not invent contributions, methods, datasets, baselines, parameters, results, significance, limitations, or citations.
 - Figures and tables may teach how to introduce and analyze visual evidence, but unlabelled values are never guessed from images.
 - Generated text is a paper draft that requires author review, not a replacement for academic judgment or factual verification.
-
-## Supported Agents
-
-Paper Alchemist supports Codex, Claude Code, OpenCode, Hermes, Pi Agent, and Kimi Code. After installation, describe the papers you want to distill or the section you want to draft.
 
 ## Troubleshooting
 
