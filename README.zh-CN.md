@@ -38,44 +38,73 @@ Paper Alchemist 将这两类职责严格分离：
 - **跨 Agent 使用**：同一开放 Skill 支持 Codex、Claude Code、OpenCode、Hermes、Pi Agent 和 Kimi Code。
 - **默认保护隐私**：论文原文、抽取全文、研究上下文和生成画像默认不进入版本控制。
 
-## 60 秒上手
+## 60 秒上手：安装 → 蒸馏 → 生成
 
-需要 Python 3.11 或更高版本。PDF 推荐安装 `pdftotext`，文本层抽取失败时回退到 `pypdf`。可选 OCR 需要系统 `PATH` 中同时存在 `pdftoppm` 和 `tesseract`；处理中文页面还需安装 Tesseract 中文语言数据。
+全程只需和能够访问终端及文件的 Agent 对话。**论文画像回答“这类论文怎样写”，不提供“你的研究有什么事实”**；生成新内容时，研究事实必须来自 `paper-context.yaml` 或你的明确回答。
 
-```bash
-git clone https://github.com/Wang-Ruibin/paper-alchemist.git
-cd paper-alchemist
-python -m venv .venv
-. .venv/bin/activate
-python -m pip install -e .
-```
+### 1. 第一次使用：让 Agent 安装
 
-为当前 Agent 安装：
-
-```bash
-paper-alchemist install --agent codex --scope user
-# agent: codex | claude | opencode | hermes | pi | kimi
-# scope: user | project
-```
-
-蒸馏论文目录：
-
-```bash
-paper-alchemist distill ./papers --profile routing-literature --language auto --ocr auto
-```
-
-让已安装的 Skill 完成模块语义蒸馏，然后整合：
-
-```bash
-paper-alchemist integrate --profile routing-literature
-paper-alchemist validate-profile --profile routing-literature
-```
-
-通过 Agent 生成摘要：
+把这段话发给 Codex、Claude Code、OpenCode、Hermes、Pi Agent 或 Kimi Code：
 
 ```text
-/abstract profile=routing-literature lang=zh format=latex context=paper-context.yaml
+请从 https://github.com/Wang-Ruibin/paper-alchemist 安装 Paper Alchemist，
+并为当前 Agent 做用户级配置。请自动检查 Python 3.11+、选择当前平台适配器、
+建立以后新会话仍可调用的隔离 Python 环境，并验证 CLI 与 Skill 均安装成功。
+不要覆盖已有安装；安装或升级 Python、PDF 工具或 OCR 组件前先征得我的同意。
+完成后告诉我是否需要重新打开会话。
 ```
+
+只想在当前研究项目中启用时，把“用户级配置”改成“项目级配置”。如果 Agent 提示需要重新加载 Skill，请开启一个新会话。
+
+### 2. 开始蒸馏：给出论文目录和画像名
+
+先把参考论文放进一个目录，例如研究项目下的 `./papers/`。然后在该研究项目中告诉 Agent：
+
+```text
+请使用 Paper Alchemist 蒸馏 ./papers，画像名为 routing-literature。
+开始前检查研究项目的 .gitignore，确保论文、paper-context.yaml 和
+.paper-alchemist/ 不会进入版本控制。自动识别中英文与 OCR 需求，
+完成论文抽取、逐篇观察、逐模块语义蒸馏、
+双语整合和最终校验。不要在只生成抽取结果或 seed 文件时停下；请持续处理，
+直到 validate-profile 返回 generation_ready: true，或遇到必须由我处理的阻塞。
+最后报告画像目录、纳入与排除的论文、警告、未完成模块和 generation_ready。
+```
+
+Agent 会在当前研究项目的 `.paper-alchemist/profiles/routing-literature/` 保存可复用画像。论文原文、研究上下文、抽取文本和画像都可能包含私有内容，应由该研究项目的 `.gitignore` 排除。
+
+### 3. 判断蒸馏是否完成：只认 `generation_ready`
+
+Agent 的最终报告中必须出现：
+
+```text
+generation_ready: true
+```
+
+这表示画像结构有效、所有中英文模块的语义蒸馏都已完成，并且双语整合文件齐全。**只有 `valid: true` 不代表蒸馏完成**：它可能只说明文件结构正确。
+
+如果 `generation_ready: false`，查看 Agent 报告的 `incomplete_profiles` 和 `errors`，让它继续：
+
+```text
+请继续完成 incomplete_profiles 中列出的模块，修复 errors，重新整合并校验，
+直到 generation_ready: true；不要把 pending、stale 或仅有 seed 的画像称为完成。
+```
+
+`warnings` 可能只是语料较少或单语证据不足，不一定阻止生成，但 Agent 必须说明这些限制。
+
+### 4. 使用画像生成新内容
+
+准备 `paper-context.yaml`，写入你的研究问题、方法、实验、结果和可用 citation key。若还没有该文件，可以先说：“请根据 Paper Alchemist 的 `paper-context.example.yaml` 引导我建立研究上下文。”
+
+画像准备完成后，直接描述要写的内容：
+
+```text
+请先确认 routing-literature 的 generation_ready 为 true，然后使用这个画像和
+./paper-context.yaml 生成一篇新的中文 LaTeX 摘要。研究事实和引用只能来自
+paper-context.yaml 或我的明确回答；如果必要事实不足，只询问摘要缺少的信息。
+完成后说明使用了哪些语言画像、是否发生降级，并把正文返回到聊天中。
+```
+
+把“摘要”替换成引言、相关工作、问题定义、方法、实验设置、结果分析、结论或自定义章节即可；也可以明确给出输出文件路径。底层[命令表](#命令)仅供自动化和排障使用。
 
 ## 工作原理
 
@@ -102,7 +131,7 @@ flowchart LR
 |---|---|
 | `distill SOURCE --profile NAME --language auto\|en\|zh --ocr auto\|never\|always` | 抽取并划分论文语料，可选 PDF OCR |
 | `integrate --profile NAME` | 整合已经完成的语义画像 |
-| `validate-profile --profile NAME` | 报告结构、语义、置信度和整合状态 |
+| `validate-profile --profile NAME` | 报告结构、语义、整合状态及 `generation_ready` 完成信号 |
 | `brief MODULE --profile NAME --language en\|zh` | 生成受事实约束的双语写作 brief |
 | `install --agent AGENT --scope user\|project` | 安装核心 Skill 与平台命令包装器 |
 | `package-skill --output dist` | 构建 `paper-alchemist.skill` |
@@ -169,3 +198,5 @@ paper-alchemist package-skill --output dist
 ## 开源协议
 
 MIT © 2026 [misakimei0331](https://github.com/misakimei0331)。详见 [LICENSE](LICENSE)。
+
+如果 Paper Alchemist 对你的研究写作有帮助，欢迎随手送它一颗 Star，让这位小炼金术士开心一下。✨

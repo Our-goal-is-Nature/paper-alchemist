@@ -6,6 +6,7 @@
 - Review private packets
 - Complete module profiles
 - Integrate bilingual profiles
+- Confirm completion
 - Update an existing profile
 - Privacy and failure handling
 
@@ -85,6 +86,25 @@ Review and refine the generated files:
 - `bilingual/conflicts.md`
 
 Align only high-level functions across languages. Keep target-language surface conventions dominant. Preserve conflict notes when English and Chinese corpora favor different paragraph lengths, voice, directness, or citation placement.
+
+## Confirm completion
+
+Run `paper-alchemist validate-profile --profile <name>` after integration. Extraction output, generated seed files, or `valid: true` alone do not mean distillation is complete. The profile is ready for generation only when the validation result contains:
+
+```json
+{
+  "valid": true,
+  "semantic_complete": true,
+  "integration_complete": true,
+  "generation_ready": true,
+  "incomplete_profiles": [],
+  "errors": []
+}
+```
+
+If `generation_ready` is false, continue the modules named in `incomplete_profiles` and resolve `errors` before integrating and validating again. Warnings do not always block generation, but report them to the user, especially low-confidence or single-language evidence.
+
+Never tell the user that distillation is complete without reporting the profile name, profile directory, `generation_ready` value, and warnings.
 
 ## Update an existing profile
 

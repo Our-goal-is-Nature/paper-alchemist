@@ -38,44 +38,78 @@ Paper Alchemist keeps those responsibilities separate:
 - **Cross-Agent** — one open Agent Skill with adapters for Codex, Claude Code, OpenCode, Hermes, Pi Agent, and Kimi Code.
 - **Private by default** — source papers, extracted text, research context, and generated profiles remain outside version control.
 
-## 60-second start
+## 60-second start: install → distill → generate
 
-Python 3.11 or newer is required. `pdftotext` is recommended for PDFs; `pypdf` is the text-layer fallback. Optional OCR requires both `pdftoppm` and `tesseract` on `PATH` (install Chinese language data to OCR Chinese pages).
+The entire workflow happens through a terminal-and-file-capable Agent. **A paper profile answers “how papers like these write,” not “what is true about your research.”** New content must take its research facts from `paper-context.yaml` or your explicit answers.
 
-```bash
-git clone https://github.com/Wang-Ruibin/paper-alchemist.git
-cd paper-alchemist
-python -m venv .venv
-. .venv/bin/activate
-python -m pip install -e .
-```
+### 1. First use: ask the Agent to install it
 
-Install for your Agent:
-
-```bash
-paper-alchemist install --agent codex --scope user
-# agents: codex | claude | opencode | hermes | pi | kimi
-# scopes: user | project
-```
-
-Distill a paper folder:
-
-```bash
-paper-alchemist distill ./papers --profile routing-literature --language auto --ocr auto
-```
-
-Ask the installed Skill to finish semantic distillation, then integrate:
-
-```bash
-paper-alchemist integrate --profile routing-literature
-paper-alchemist validate-profile --profile routing-literature
-```
-
-Draft an abstract through the Agent:
+Send this to Codex, Claude Code, OpenCode, Hermes, Pi Agent, or Kimi Code:
 
 ```text
-/abstract profile=routing-literature lang=en format=latex context=paper-context.yaml
+Install Paper Alchemist from https://github.com/Wang-Ruibin/paper-alchemist and
+configure it at user scope for the Agent you are currently running as. Check for
+Python 3.11+, choose this platform's adapter, create an isolated Python environment
+that remains callable from future sessions, and verify both the CLI and Skill.
+Do not overwrite an existing installation. Ask before installing or upgrading Python,
+PDF tools, or OCR components. Tell me whether I must start a new session when done.
 ```
+
+Replace “user scope” with “project scope” to enable it only in the current research project. If the Agent says Skill discovery requires a reload, start a new session.
+
+### 2. Start distilling: provide a paper folder and profile name
+
+Put the reference papers in a folder such as `./papers/`, then tell the Agent from your research project:
+
+```text
+Use Paper Alchemist to distill ./papers into a profile named routing-literature.
+Before processing, check the research project's .gitignore and keep the papers,
+paper-context.yaml, and .paper-alchemist/ out of version control. Detect English,
+Chinese, and OCR needs automatically. Complete paper extraction,
+per-paper observations, module-level semantic synthesis, bilingual integration, and
+final validation. Do not stop after producing extraction results or seed files; keep
+working until validate-profile returns generation_ready: true, or report a blocker
+that requires me. Finally report the profile directory, included and excluded papers,
+warnings, incomplete modules, and generation_ready.
+```
+
+The reusable profile is stored at `.paper-alchemist/profiles/routing-literature/` in the current research project. Source papers, research context, extracted text, and profiles may contain private material and should be excluded by that project's `.gitignore`.
+
+### 3. Know when distillation is complete: require `generation_ready`
+
+The Agent's final report must contain:
+
+```text
+generation_ready: true
+```
+
+This means the profile is structurally valid, every English and Chinese module has completed semantic synthesis, and all bilingual integration artifacts exist. **`valid: true` alone does not mean distillation is complete**; it may only mean the files are structurally valid.
+
+If `generation_ready: false`, inspect the reported `incomplete_profiles` and `errors`, then say:
+
+```text
+Complete every module listed in incomplete_profiles, resolve errors, integrate again,
+and revalidate until generation_ready: true. Do not call pending, stale, or seed-only
+profiles complete.
+```
+
+Warnings may indicate a small corpus or missing evidence in one language. They do not always block generation, but the Agent must explain the limitations.
+
+### 4. Generate new content from the profile
+
+Prepare `paper-context.yaml` with your research problem, method, experiments, results, and allowed citation keys. If you do not have one, first say: “Use Paper Alchemist's `paper-context.example.yaml` to guide me through creating my research context.”
+
+Once the profile is ready, describe the content you want:
+
+```text
+First confirm that routing-literature has generation_ready: true. Then use that profile
+and ./paper-context.yaml to draft a new English LaTeX abstract. Research facts and
+citations may come only from paper-context.yaml or my explicit answers. If required
+facts are missing, ask only for what the abstract needs. When done, report which
+language profiles were used and any degraded status, then return the draft in chat.
+```
+
+Replace “abstract” with introduction, related work, problem definition, methodology, experiment setup, results analysis, conclusion, or a custom section. You may also provide an exact output path. The underlying [command table](#commands) is only for automation and troubleshooting.
 
 ## How it works
 
@@ -102,7 +136,7 @@ flowchart LR
 |---|---|
 | `distill SOURCE --profile NAME --language auto\|en\|zh --ocr auto\|never\|always` | Extract and partition a corpus, with optional PDF OCR |
 | `integrate --profile NAME` | Integrate completed semantic profiles |
-| `validate-profile --profile NAME` | Report structural, semantic, confidence, and integration status |
+| `validate-profile --profile NAME` | Report structure, semantic and integration status, and the `generation_ready` completion signal |
 | `brief MODULE --profile NAME --language en\|zh` | Build a grounded bilingual drafting brief |
 | `install --agent AGENT --scope user\|project` | Install the core Skill and native wrappers |
 | `package-skill --output dist` | Build `paper-alchemist.skill` |
@@ -169,3 +203,5 @@ paper-alchemist package-skill --output dist
 ## License
 
 MIT © 2026 [misakimei0331](https://github.com/misakimei0331). See [LICENSE](LICENSE).
+
+If Paper Alchemist helps your research writing, a Star would make this little alchemist smile. ✨

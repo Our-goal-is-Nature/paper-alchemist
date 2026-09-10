@@ -45,7 +45,7 @@ def parser() -> argparse.ArgumentParser:
     integrate.add_argument("--workspace", type=Path, default=Path.cwd())
 
     validate = sub.add_parser(
-        "validate-profile", help="Validate a profile's structure and confidence"
+        "validate-profile", help="Validate profile structure and generation readiness"
     )
     validate.add_argument("--profile", required=True)
     validate.add_argument("--workspace", type=Path, default=Path.cwd())

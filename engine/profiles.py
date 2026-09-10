@@ -369,11 +369,16 @@ def validate_profile(profile: str, workspace: Path) -> dict[str, Any]:
         for relative in integration_files:
             if not (profile_dir / relative).is_file():
                 errors.append(f"missing {relative}")
+    semantic_complete = not pending
+    integration_complete = len(integration_present) == len(integration_files)
+    valid = not errors
     return {
         "profile": slug,
-        "valid": not errors,
-        "semantic_complete": not pending,
-        "integration_complete": len(integration_present) == len(integration_files),
+        "valid": valid,
+        "semantic_complete": semantic_complete,
+        "integration_complete": integration_complete,
+        "generation_ready": valid and semantic_complete and integration_complete,
+        "incomplete_profiles": pending,
         "errors": errors,
         "warnings": warnings,
     }

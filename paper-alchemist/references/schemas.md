@@ -4,6 +4,7 @@
 
 - Source manifest
 - Module profile
+- Profile validation
 - Paper context
 - Generation brief
 - Confidence
@@ -52,6 +53,19 @@ Keep these H2 headings exactly:
 6. `Do`
 7. `Avoid`
 8. `Generation checklist`
+
+## Profile validation
+
+`validate-profile` distinguishes structural validity from readiness for generation:
+
+- `valid`: all required files, frontmatter fields, and headings are structurally valid;
+- `semantic_complete`: every English and Chinese module has current Agent synthesis;
+- `integration_complete`: all four language and cross-language integration artifacts exist;
+- `generation_ready`: all three conditions above are true;
+- `incomplete_profiles`: module identifiers that are `pending`, `stale`, missing, or invalid;
+- `errors` and `warnings`: blocking structural problems and non-blocking quality cautions.
+
+Use `generation_ready`, not `valid`, as the single completion signal before drafting.
 
 ## Paper context
 

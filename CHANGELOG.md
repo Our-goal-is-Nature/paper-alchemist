@@ -4,6 +4,12 @@ All notable changes are documented here.
 
 ## [Unreleased]
 
+### Changed
+
+- Replaced the command-heavy quick start with conversation-first installation and end-to-end usage prompts in both README languages.
+- Updated the core Skill to translate outcome-oriented requests into the complete workflow and to perform explicitly requested, guarded installation steps.
+- Added `generation_ready` and `incomplete_profiles` to profile validation so users and Agents have one unambiguous distillation-completion signal.
+
 ## [0.2.3] - 2026-08-09
 
 ### Changed
