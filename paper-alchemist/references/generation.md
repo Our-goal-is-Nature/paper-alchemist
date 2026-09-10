@@ -7,6 +7,7 @@
 - Fill missing research facts
 - Blend bilingual profiles
 - Draft the module
+- Generate multiple sections or a complete draft
 - Validate the output
 
 ## Build or confirm the research context
@@ -79,6 +80,25 @@ Apply the selected module contract:
 Use `\cite{key}` for LaTeX and the supplied citation convention for Markdown. Never use a key absent from `allowed_citation_keys`.
 
 When profiles include figure/table patterns, transfer only their rhetorical function: how a visual is introduced, what comparison is foregrounded, and how observations are separated from explanations. Use a figure number, table number, caption claim, or numeric value only when it appears in the verified context or the user explicitly supplies it. Never estimate a value from chart pixels.
+
+## Generate multiple sections or a complete draft
+
+When the user requests several sections, run the full generation workflow separately for each requested module. Reuse confirmed research context, but build a distinct brief and apply the matching module profile for every section.
+
+For a complete draft, normally work in this order:
+
+1. introduction;
+2. related work;
+3. problem definition;
+4. methodology;
+5. experiment setup;
+6. results analysis;
+7. conclusion;
+8. abstract.
+
+Draft the abstract last so it reflects the verified body, then place it at the beginning of the assembled document. Preserve terminology, notation, contribution statements, numeric values, and citation keys across sections. Remove accidental repetition between the introduction, methodology, results, and conclusion.
+
+The user may request one combined file or separate section files. Write only to the exact path or paths they provide. If required facts are missing, ask for them before drafting the affected section; do not fill gaps merely to make the document appear complete.
 
 ## Validate the output
 

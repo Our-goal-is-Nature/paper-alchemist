@@ -1,6 +1,6 @@
 ---
 name: paper-alchemist
-description: Distill corpus-level academic writing patterns from folders of English and Chinese PDF, LaTeX, DOCX, Markdown, or text papers; integrate module-specific bilingual profiles; and draft grounded abstracts, introductions, related work, problem definitions, methodologies, experiment setups, results analyses, conclusions, or custom sections. Use when an Agent must analyze how a paper corpus writes, build or update a reusable style profile, or generate a paper section from verified research facts without imitating one author or inventing evidence.
+description: Distill corpus-level academic writing patterns from folders of English and Chinese PDF, LaTeX, DOCX, Markdown, or text papers; integrate module-specific bilingual profiles; and draft grounded abstracts, introductions, related work, problem definitions, methodologies, experiment setups, results analyses, conclusions, custom sections, or complete multi-section papers. Use when an Agent must analyze how a paper corpus writes, build or update a reusable style profile, or generate paper content from verified research facts without imitating one author or inventing evidence.
 ---
 
 # Paper Alchemist
@@ -11,6 +11,7 @@ Use a deterministic local CLI for extraction and validation. Perform semantic di
 
 - Accept natural-language requests for installation, corpus profiling, integration, validation, and drafting. Infer command arguments from paths and outcomes the user provides; ask only for choices that materially change the result.
 - When the user requests an end-to-end task, carry it through extraction, semantic distillation, integration, validation, and drafting as far as the available evidence allows. Do not make the user relay intermediate CLI commands.
+- When the user requests several sections or a complete paper, build and apply the matching module brief to each section separately, then assemble the requested deliverable with consistent terminology, contributions, numbers, and citations. Do not replace module-specific generation with one undifferentiated prompt.
 - For a distillation request, extraction and seed creation are only intermediate results. Say that distillation is complete only after semantic synthesis and integration finish and `validate-profile` returns `generation_ready: true`.
 - Translate internal status into user outcomes. Lead with “the profile is ready for writing” or “the profile still needs work,” then explain included or excluded papers, limitations, and any action the user must take. Show raw fields or commands only when the user asks, when they are useful for reproducibility or troubleshooting, or when the user must run something the Agent cannot execute.
 - Infer the current Agent adapter when it is evident from the runtime. Do not ask the user to choose from adapter identifiers merely to reproduce the CLI interface.
@@ -20,6 +21,7 @@ Use a deterministic local CLI for extraction and validation. Perform semantic di
 - For `distill`, read [references/workflow.md](references/workflow.md) and execute the complete corpus workflow.
 - For `integrate`, validate completed module profiles, then run the integration workflow in [references/workflow.md](references/workflow.md).
 - For `abstract`, `introduction`, `related-work`, `problem-definition`, `methodology`, `experiment-setup`, `results-analysis`, `conclusion`, or `section`, read [references/generation.md](references/generation.md).
+- For multiple sections or a complete draft, read [references/generation.md](references/generation.md) and follow its multi-section orchestration rules.
 - For profile and context file fields, read [references/schemas.md](references/schemas.md).
 - For installation and platform-native invocation, read [references/platforms.md](references/platforms.md).
 

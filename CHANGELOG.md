@@ -6,6 +6,9 @@ All notable changes are documented here.
 
 ### Changed
 
+- Rebuilt both READMEs around user tasks, moving CI, repository layout, build commands, and raw internal status details out of the onboarding flow.
+- Documented and enabled module-by-module drafting, multi-section drafting, and complete paper-draft assembly through the Agent.
+- Corrected MIT copyright attribution to `Wang-Ruibin` while retaining `misakimei0331` as the public developer display name in package metadata.
 - Replaced the command-heavy quick start with user-facing installation, distillation, readiness, guided research-context, and generation conversations in both README languages.
 - Updated the core Skill to translate outcome-oriented requests into the complete workflow and to perform explicitly requested, guarded installation steps.
 - Added `generation_ready` and `incomplete_profiles` to profile validation so users and Agents have one unambiguous distillation-completion signal.
