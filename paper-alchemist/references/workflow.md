@@ -102,9 +102,9 @@ Run `paper-alchemist validate-profile --profile <name>` after integration. Extra
 }
 ```
 
-If `generation_ready` is false, continue the modules named in `incomplete_profiles` and resolve `errors` before integrating and validating again. Warnings do not always block generation, but report them to the user, especially low-confidence or single-language evidence.
+If `generation_ready` is false, continue the modules named in `incomplete_profiles` and resolve `errors` before integrating and validating again. Warnings do not always block generation, but explain their practical effect to the user, especially low-confidence or single-language evidence.
 
-Never tell the user that distillation is complete without reporting the profile name, profile directory, `generation_ready` value, and warnings.
+Use these fields as the internal completion gate. In the user-facing report, clearly say whether the named profile is ready for writing, summarize source coverage and limitations in plain language, and provide raw validation values only when requested or troubleshooting.
 
 ## Update an existing profile
 

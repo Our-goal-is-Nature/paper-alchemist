@@ -12,7 +12,7 @@ Use a deterministic local CLI for extraction and validation. Perform semantic di
 - Accept natural-language requests for installation, corpus profiling, integration, validation, and drafting. Infer command arguments from paths and outcomes the user provides; ask only for choices that materially change the result.
 - When the user requests an end-to-end task, carry it through extraction, semantic distillation, integration, validation, and drafting as far as the available evidence allows. Do not make the user relay intermediate CLI commands.
 - For a distillation request, extraction and seed creation are only intermediate results. Say that distillation is complete only after semantic synthesis and integration finish and `validate-profile` returns `generation_ready: true`.
-- Summarize progress and decisions in plain language. Show commands only when the user asks, when they are useful for reproducibility, or when the user must run something the Agent cannot execute.
+- Translate internal status into user outcomes. Lead with “the profile is ready for writing” or “the profile still needs work,” then explain included or excluded papers, limitations, and any action the user must take. Show raw fields or commands only when the user asks, when they are useful for reproducibility or troubleshooting, or when the user must run something the Agent cannot execute.
 - Infer the current Agent adapter when it is evident from the runtime. Do not ask the user to choose from adapter identifiers merely to reproduce the CLI interface.
 
 ## Choose the operation
@@ -53,7 +53,8 @@ Keep English and Chinese evidence separate during extraction and module distilla
 
 - Use the corpus only to infer aggregate writing patterns. Do not copy long source passages or imitate a single author.
 - Use `paper-context.yaml` and explicit user answers as the only sources of research facts.
-- Ask only for module-required missing facts before drafting.
+- If the user has no context file, do not make them author YAML manually. Read user-supplied drafts, notes, tables, and bibliography files when available; otherwise conduct a short guided interview. Collect only module-required facts, ask in small groups, distinguish missing or ambiguous claims, and present a fact checklist for confirmation before writing a user-requested context path.
+- Ask only for module-required missing facts before drafting. Never turn an unknown answer into a guessed value.
 - Never invent contributions, methods, datasets, baselines, parameter values, numerical results, statistical significance, limitations, or citations.
 - Use only citation keys listed in the context file or supplied explicitly by the user.
 - Return content in chat by default. Write a file only when the user explicitly provides an output path.
@@ -62,6 +63,6 @@ Keep English and Chinese evidence separate during extraction and module distilla
 
 - Run `paper-alchemist validate-profile --profile <name>` after distillation or integration.
 - Treat `pending` and `stale` module profiles as incomplete. Never bypass the integration or generation gate.
-- If `generation_ready` is false, report `incomplete_profiles` and `errors`, continue any work that can be completed safely, and never describe the profile as ready for generation.
+- If `generation_ready` is false, use `incomplete_profiles` and `errors` internally to continue any work that can be completed safely. Tell the user only what remains, why the Agent cannot continue, or what user action is required; never describe the profile as ready for generation.
 - Confirm every used profile path and source count from the generation brief.
-- At completion, report the profile name, profile directory, `generation_ready` value, warnings, and any degraded evidence. For drafted content, also report target language, secondary language, bilingual status, and output format.
+- At completion, clearly say that the named profile is ready for writing and summarize source coverage, exclusions, warnings, and degraded evidence in plain language. Include raw validation values only for troubleshooting or on request. For drafted content, also report target language, secondary language, bilingual status, and output format.

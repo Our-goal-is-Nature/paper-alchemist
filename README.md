@@ -65,51 +65,77 @@ Put the reference papers in a folder such as `./papers/`, then tell the Agent fr
 Use Paper Alchemist to distill ./papers into a profile named routing-literature.
 Before processing, check the research project's .gitignore and keep the papers,
 paper-context.yaml, and .paper-alchemist/ out of version control. Detect English,
-Chinese, and OCR needs automatically. Complete paper extraction,
-per-paper observations, module-level semantic synthesis, bilingual integration, and
-final validation. Do not stop after producing extraction results or seed files; keep
-working until validate-profile returns generation_ready: true, or report a blocker
-that requires me. Finally report the profile directory, included and excluded papers,
-warnings, incomplete modules, and generation_ready.
+Chinese, and OCR needs automatically. Complete paper extraction, per-paper observations,
+module-level semantic synthesis, bilingual integration, and final checks. Keep working
+until the profile can actually be used for writing; do not stop after extraction.
+If you cannot resolve something yourself, tell me only what I need to do. When finished,
+explain in plain language whether the profile is ready, which papers were included,
+and any limitations.
 ```
 
-The reusable profile is stored at `.paper-alchemist/profiles/routing-literature/` in the current research project. Source papers, research context, extracted text, and profiles may contain private material and should be excluded by that project's `.gitignore`.
+The Agent stores a reusable profile in the current research project. Source papers, research context, extracted text, and profiles may contain private material and should be excluded by that project's `.gitignore`.
 
-### 3. Know when distillation is complete: require `generation_ready`
+### 3. Wait for the Agent to say “the profile is ready”
 
-The Agent's final report must contain:
+You do not need to inspect intermediate files or understand validation fields. When finished, the Agent should give you a conclusion like this:
+
+> **The `routing-literature` profile is ready for writing.** Eighteen papers were included and two were excluded because their text could not be extracted. The English results-analysis profile has limited evidence and will be marked low confidence when used.
+
+If the Agent says only that papers were extracted, an initial profile was created, modules remain, or integration still needs to run, distillation is not finished. Reply with:
 
 ```text
-generation_ready: true
+Continue the remaining distillation, integration, and checks. Tell me when the profile
+is genuinely ready for writing. If you cannot continue, explain why and what I need to do.
 ```
 
-This means the profile is structurally valid, every English and Chinese module has completed semantic synthesis, and all bilingual integration artifacts exist. **`valid: true` alone does not mean distillation is complete**; it may only mean the files are structurally valid.
+The Agent performs the technical validation internally and translates small-corpus, single-language, OCR, and excluded-paper limitations into plain language. Technical status fields remain in the [command table](#commands) for troubleshooting only.
 
-If `generation_ready: false`, inspect the reported `incomplete_profiles` and `errors`, then say:
+### 4. Let the Agent build your research context and generate new content
+
+You do not need to write `paper-context.yaml` yourself. It is the Agent's structured record of which facts about your research have been confirmed:
+
+`paper profile (how to write) + research context (what to say) = new content`
+
+If you already have a draft, experiment notes, result tables, or a BibTeX file, give their paths to the Agent:
 
 ```text
-Complete every module listed in incomplete_profiles, resolve errors, integrate again,
-and revalidate until generation_ready: true. Do not call pending, stale, or seed-only
-profiles complete.
+I want to use the routing-literature profile to write an English abstract. First read:
+- ./draft/method.md
+- ./results/summary.xlsx
+- ./references.bib
+
+Extract only research facts that are explicitly present in those materials. Do not treat
+the reference-paper profile as evidence about my research. In small groups, ask me about
+anything required by the abstract that is missing or ambiguous. First summarize the
+problem, gap, method, contributions, results, and citations you plan to record. After I
+confirm them, create ./paper-context.yaml and check that it contains everything the
+abstract requires.
 ```
 
-Warnings may indicate a small corpus or missing evidence in one language. They do not always block generation, but the Agent must explain the limitations.
-
-### 4. Generate new content from the profile
-
-Prepare `paper-context.yaml` with your research problem, method, experiments, results, and allowed citation keys. If you do not have one, first say: “Use Paper Alchemist's `paper-context.example.yaml` to guide me through creating my research context.”
-
-Once the profile is ready, describe the content you want:
+If your materials are not organized yet, build the context entirely through conversation:
 
 ```text
-First confirm that routing-literature has generation_ready: true. Then use that profile
-and ./paper-context.yaml to draft a new English LaTeX abstract. Research facts and
-citations may come only from paper-context.yaml or my explicit answers. If required
-facts are missing, ask only for what the abstract needs. When done, report which
-language profiles were used and any degraded status, then return the draft in chat.
+I want to use the routing-literature profile to write an English abstract, but I do not
+have paper-context.yaml. Help me build the research context through conversation. Ask one
+small group of easy-to-answer questions at a time, covering my research problem, the gap
+in existing work, my method, main contributions, key experimental results, and allowed
+citations. Never guess a fact or number. When the information is complete, show me a short
+fact checklist. After I confirm it, create ./paper-context.yaml and check whether it is
+sufficient for the abstract.
 ```
 
-Replace “abstract” with introduction, related work, problem definition, methodology, experiment setup, results analysis, conclusion, or a custom section. You may also provide an exact output path. The underlying [command table](#commands) is only for automation and troubleshooting.
+The Agent collects only facts required by the section you are writing. A methodology section mainly needs the method's name, purpose, and components; results analysis also needs metrics, comparison targets, exact values, and confirmed interpretations. Missing information may remain empty, but the Agent will not invent it.
+
+After confirming the research context, tell the Agent:
+
+```text
+Use the ready routing-literature profile and ./paper-context.yaml to draft a new English
+LaTeX abstract. If any required facts are still missing, continue asking me. Do not add
+unconfirmed results or citations. When finished, explain any known profile limitations
+and return the draft in chat.
+```
+
+Replace “abstract” with introduction, related work, problem definition, methodology, experiment setup, results analysis, conclusion, or a custom section. You may also provide an exact output path.
 
 ## How it works
 

@@ -2,11 +2,33 @@
 
 ## Contents
 
+- Build or confirm the research context
 - Build the generation brief
 - Fill missing research facts
 - Blend bilingual profiles
 - Draft the module
 - Validate the output
+
+## Build or confirm the research context
+
+Do not require the user to hand-author YAML. If a usable context file was not supplied, help build one in either of these ways:
+
+1. Read user-named drafts, experiment notes, result tables, and bibliography files. Extract only facts explicitly supported by those materials and keep uncertain or conflicting statements unresolved.
+2. If those materials are unavailable or incomplete, interview the user in small groups of easy-to-answer questions.
+
+Determine the requested writing module before collecting facts, then prioritize only its requirements. For example, an abstract needs the problem, gap, method, contributions, and results; a methodology section needs the method; results analysis needs the experiments and results. Optional project metadata may be collected when useful, but do not turn context setup into a requirement to complete every template field.
+
+Before writing a user-requested context path:
+
+- summarize the facts that will be recorded and their supplied source;
+- list missing, ambiguous, or contradictory items separately;
+- show exact numerical values and units without normalization or reinterpretation;
+- list allowed citation keys and what each key may support;
+- ask the user to confirm or correct the checklist.
+
+After confirmation, use `assets/paper-context.example.yaml` as the field-shape guide and write only to the exact path the user requested. Keep the file out of version control. When the profile is ready, build the generation brief and use `missing_context_fields` as an internal checklist; ask the user only about remaining facts instead of exposing schema field names unless troubleshooting.
+
+The style corpus never supplies research facts. Do not infer a contribution, result, comparison, significance claim, limitation, or citation authorization from the distilled profile.
 
 ## Build the generation brief
 
