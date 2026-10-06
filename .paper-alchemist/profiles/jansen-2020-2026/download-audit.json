@@ -1,0 +1,157 @@
+[
+  {
+    "doi": "10.1016/j.nlp.2023.100020",
+    "title": "Employing large language models in survey research",
+    "year": 2023,
+    "oa": true,
+    "status": "excluded"
+  },
+  {
+    "doi": "10.2478/dim-2020-0005",
+    "title": "Data-Driven Personas for Enhanced User Understanding: Combining Empathy with Rationality for Better Insights to Analytics",
+    "year": 2020,
+    "oa": true,
+    "status": "downloaded",
+    "url": "https://www.bernardjjansen.com/uploads/2/4/1/8/24188166/1-s2.0-s2543925122000560-main.pdf",
+    "file": "2020-10-2478-dim-2020-0005.pdf",
+    "pages": 17,
+    "sha256": "0e4a9dbd5e99173cd49a722bf3114a048a5e1e95da9a8a1f99cdc77ed53ded2f"
+  },
+  {
+    "doi": "10.17705/1pais.14301",
+    "title": "How to Create Personas: Three Persona Creation Methodologies with Implications for Practical Employment",
+    "year": 2022,
+    "oa": true,
+    "status": "excluded"
+  },
+  {
+    "doi": "10.1371/journal.pone.0268212",
+    "title": "Measuring user interactions with websites: A comparison of two industry standard analytics approaches using data of 86 websites",
+    "year": 2022,
+    "oa": true,
+    "status": "downloaded",
+    "url": "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0268212&type=printable",
+    "file": "2022-10-1371-journal-pone-0268212.pdf",
+    "pages": 27,
+    "sha256": "e2c259f248651dbb1558b24f63bce437cb61755904efbc9fd86b8905c90deaf5"
+  },
+  {
+    "doi": "10.24251/hicss.2021.604",
+    "title": "Strengths and Weaknesses of Persona Creation Methods: Guidelines and Opportunities for Digital Innovations",
+    "year": 2021,
+    "oa": true,
+    "status": "excluded"
+  },
+  {
+    "doi": "10.1002/pra2.215",
+    "title": "From flat file to interface: Synthesis of personas and analytics for enhanced user understanding",
+    "year": 2020,
+    "oa": false,
+    "status": "downloaded",
+    "url": "https://www.bernardjjansen.com/uploads/2/4/1/8/24188166/pra2.215.pdf",
+    "file": "2020-10-1002-pra2-215.pdf",
+    "pages": 11,
+    "sha256": "db13ed586ac3c726818a1ab4e1ea34a18fc793a2291d5653072e2c605a2f9f19"
+  },
+  {
+    "doi": "10.1016/j.dim.2022.100020",
+    "title": "The illusion of data validity: Why numbers about people are likely wrong",
+    "year": 2022,
+    "oa": true,
+    "status": "downloaded",
+    "url": "https://www.bernardjjansen.com/uploads/2/4/1/8/24188166/1-s2.0-s2543925122001188-main.pdf",
+    "file": "2022-10-1016-j-dim-2022-100020.pdf",
+    "pages": 14,
+    "sha256": "94e2e5212fc94c6532b5b5b80d5552a785417fccd34cba532e37c3fa48484f86"
+  },
+  {
+    "doi": "10.53375/ijecer.2021.31",
+    "title": "The Effect of Hyperparameter Selection on the Personification of Customer Population Data",
+    "year": 2021,
+    "oa": true,
+    "status": "downloaded",
+    "url": "https://ijecer.org/ijecer/article/download/31/9",
+    "file": "2021-10-53375-ijecer-2021-31.pdf",
+    "pages": 12,
+    "sha256": "43988b9a6a1eb2a5d3263ab369bd2cf51540ed46ebf32fc1ce999fc269da4dfd"
+  },
+  {
+    "doi": "10.1016/j.eswa.2021.115611",
+    "title": "Persona analytics: Analyzing the stability of online segments and content interests over time using non-negative matrix factorization",
+    "year": 2021,
+    "oa": false,
+    "status": "downloaded",
+    "url": "https://www.bernardjjansen.com/uploads/2/4/1/8/24188166/persona_analytics_eswa2021.pdf",
+    "file": "2021-10-1016-j-eswa-2021-115611.pdf",
+    "pages": 15,
+    "sha256": "3726fb7b7acab9fd5c2b5fe9e2926c9e46da9c2fb0e1cf750ba7c16bfcf6b44b"
+  },
+  {
+    "doi": "10.1007/s10796-023-10395-5",
+    "title": "Finetuning Analytics Information Systems for a Better Understanding of Users: Evidence of Personification Bias on Multiple Digital Channels",
+    "year": 2023,
+    "oa": true,
+    "status": "downloaded",
+    "url": "https://link.springer.com/content/pdf/10.1007/s10796-023-10395-5.pdf",
+    "file": "2023-10-1007-s10796-023-10395-5.pdf",
+    "pages": 24,
+    "sha256": "9056ca06776c615495b7575fd70de37ae76147925e1c30eed1251f02967384b6"
+  },
+  {
+    "doi": "10.1016/j.elerap.2021.101083",
+    "title": "Too few, too many, just right: Creating the necessary number of segments for large online customer populations",
+    "year": 2021,
+    "oa": false,
+    "status": "no_pdf_url",
+    "url": ""
+  },
+  {
+    "doi": "10.2478/dim-2020-0048",
+    "title": "Making Meaningful User Segments from Datasets Using Product Dissemination and Product Impact",
+    "year": 2020,
+    "oa": true,
+    "status": "failed",
+    "url": "https://www.sciendo.com/pdf/10.2478/dim-2020-0048",
+    "error": "404 Client Error: Not Found for url: https://reference-global.com:443/pdf/10.2478/dim-2020-0048"
+  },
+  {
+    "doi": "10.1145/3750069.3750390",
+    "title": "“Using a Computer for the First Time, So I Feel It's Hard”: A Qualitative Analysis of Usability Pain Points for Blue-and White-Collar Users in an 86-Participant User Study",
+    "year": 2025,
+    "oa": true,
+    "status": "downloaded",
+    "url": "https://www.bernardjjansen.com/uploads/2/4/1/8/24188166/3750069.3750390.pdf",
+    "file": "2025-10-1145-3750069-3750390.pdf",
+    "pages": 10,
+    "sha256": "6b2c33e472d4c06201dbbca9a1756400edeb4a526bfe7741e494179b43fcd27b"
+  },
+  {
+    "doi": "10.1109/idsta53674.2021.9660806",
+    "title": "Next Likely Behavior: Predicting Individual Actions from Aggregate User Behaviors",
+    "year": 2021,
+    "oa": false,
+    "status": "downloaded",
+    "url": "https://www.bernardjjansen.com/uploads/2/4/1/8/24188166/02_idsta2021_rc_04.pdf",
+    "file": "2021-10-1109-idsta53674-2021-9660806.pdf",
+    "pages": 5,
+    "sha256": "8dd5824193701f511a3d5cf547bd0f45092b66af174b340ce6cce27b29805e3a"
+  },
+  {
+    "doi": "10.13366/j.dik.2020.04.005",
+    "title": "信息行为研究如何进阶——IP&M 主编Bernard Jim Jansen教授专访",
+    "year": 2020,
+    "oa": false,
+    "status": "excluded"
+  },
+  {
+    "doi": "10.1145/3800935.3830835",
+    "title": "“Half My Survey Data Is Bad; The Problem Is, I Can't Tell Which Half”: Evaluating the Validatability of Large-Scale Survey Data Using 176 Algorithmically Generated Personas",
+    "year": 2026,
+    "oa": true,
+    "status": "downloaded",
+    "url": "https://www.bernardjjansen.com/uploads/2/4/1/8/24188166/3800935.3830835.pdf",
+    "file": "2026-10-1145-3800935-3830835.pdf",
+    "pages": 10,
+    "sha256": "59da72d8d544bac52a0cfdececb1c3a98998c6bc121898aa0f8577d5183c592c"
+  }
+]
