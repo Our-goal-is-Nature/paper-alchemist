@@ -8,4 +8,5 @@ test -x .claude/skills/paper-alchemist/scripts/run.py
 command -v paper-alchemist
 paper-alchemist --version
 paper-alchemist validate-skill .claude/skills/paper-alchemist
+python3 .claude/skills/paper-alchemist/scripts/run.py --version
 echo "paper-alchemist ready for ${LINEAR_ISSUE_IDENTIFIER:-unknown}"
