@@ -13,10 +13,7 @@ build/
 *.skill
 
 # Private research inputs and generated state
-/.paper-alchemist/*
-!/.paper-alchemist/profiles/
-/.paper-alchemist/profiles/*
-!/.paper-alchemist/profiles/jansen-2020-2026/
+/.paper-alchemist/
 /paper-context.yaml
 /paper-context.local.yaml
 /papers/
