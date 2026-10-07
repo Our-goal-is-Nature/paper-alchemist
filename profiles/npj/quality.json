@@ -1,0 +1,228 @@
+{
+  "schema_version": 1,
+  "profile": "npj",
+  "updated_at": "2026-10-07T13:48:49+00:00",
+  "documents_found": 5,
+  "documents_included": 5,
+  "documents_excluded": 0,
+  "source_coverage": {
+    "included_ratio": 1.0,
+    "formats": {
+      "md": 5
+    },
+    "included_languages": {
+      "en": 5
+    },
+    "included_content_modes": {
+      "prose": 5
+    },
+    "ocr_documents": 0,
+    "exclusions_by_reason": {}
+  },
+  "anomalies": [],
+  "module_samples": {
+    "en": {
+      "abstract": 5,
+      "introduction": 5,
+      "related-work": 5,
+      "problem-definition": 5,
+      "methodology": 2,
+      "experiment-setup": 2,
+      "results-analysis": 3,
+      "conclusion": 5
+    },
+    "zh": {
+      "abstract": 0,
+      "introduction": 0,
+      "related-work": 0,
+      "problem-definition": 0,
+      "methodology": 0,
+      "experiment-setup": 0,
+      "results-analysis": 0,
+      "conclusion": 0
+    }
+  },
+  "module_confidence": {
+    "en": {
+      "abstract": "medium",
+      "introduction": "medium",
+      "related-work": "medium",
+      "problem-definition": "medium",
+      "methodology": "low",
+      "experiment-setup": "low",
+      "results-analysis": "medium",
+      "conclusion": "medium"
+    },
+    "zh": {
+      "abstract": "low",
+      "introduction": "low",
+      "related-work": "low",
+      "problem-definition": "low",
+      "methodology": "low",
+      "experiment-setup": "low",
+      "results-analysis": "low",
+      "conclusion": "low"
+    }
+  },
+  "metrics": {
+    "en": {
+      "abstract": {
+        "average_sentence_length": 18.71,
+        "citations": 0.0,
+        "hedges": 0.4,
+        "first_person_markers": 1.0,
+        "figure_mentions": 0.0,
+        "table_mentions": 0.0
+      },
+      "introduction": {
+        "average_sentence_length": 20.88,
+        "citations": 0.0,
+        "hedges": 2.2,
+        "first_person_markers": 1.8,
+        "figure_mentions": 0.4,
+        "table_mentions": 0.6
+      },
+      "related-work": {
+        "average_sentence_length": 23.4,
+        "citations": 0.0,
+        "hedges": 3.6,
+        "first_person_markers": 2.0,
+        "figure_mentions": 0.6,
+        "table_mentions": 0.6
+      },
+      "problem-definition": {
+        "average_sentence_length": 22.45,
+        "citations": 0.0,
+        "hedges": 3.6,
+        "first_person_markers": 2.0,
+        "figure_mentions": 0.6,
+        "table_mentions": 0.0
+      },
+      "methodology": {
+        "average_sentence_length": 18.68,
+        "citations": 0.0,
+        "hedges": 1.0,
+        "first_person_markers": 16.0,
+        "figure_mentions": 3.0,
+        "table_mentions": 0.0
+      },
+      "experiment-setup": {
+        "average_sentence_length": 17.62,
+        "citations": 0.0,
+        "hedges": 1.5,
+        "first_person_markers": 8.0,
+        "figure_mentions": 2.0,
+        "table_mentions": 1.0
+      },
+      "results-analysis": {
+        "average_sentence_length": 13.31,
+        "citations": 0.0,
+        "hedges": 8.0,
+        "first_person_markers": 3.33,
+        "figure_mentions": 2.33,
+        "table_mentions": 1.67
+      },
+      "conclusion": {
+        "average_sentence_length": 21.58,
+        "citations": 0.0,
+        "hedges": 4.0,
+        "first_person_markers": 7.2,
+        "figure_mentions": 0.2,
+        "table_mentions": 0.0
+      }
+    },
+    "zh": {
+      "abstract": {
+        "average_sentence_length": 0.0,
+        "citations": 0.0,
+        "hedges": 0.0,
+        "first_person_markers": 0.0,
+        "figure_mentions": 0.0,
+        "table_mentions": 0.0
+      },
+      "introduction": {
+        "average_sentence_length": 0.0,
+        "citations": 0.0,
+        "hedges": 0.0,
+        "first_person_markers": 0.0,
+        "figure_mentions": 0.0,
+        "table_mentions": 0.0
+      },
+      "related-work": {
+        "average_sentence_length": 0.0,
+        "citations": 0.0,
+        "hedges": 0.0,
+        "first_person_markers": 0.0,
+        "figure_mentions": 0.0,
+        "table_mentions": 0.0
+      },
+      "problem-definition": {
+        "average_sentence_length": 0.0,
+        "citations": 0.0,
+        "hedges": 0.0,
+        "first_person_markers": 0.0,
+        "figure_mentions": 0.0,
+        "table_mentions": 0.0
+      },
+      "methodology": {
+        "average_sentence_length": 0.0,
+        "citations": 0.0,
+        "hedges": 0.0,
+        "first_person_markers": 0.0,
+        "figure_mentions": 0.0,
+        "table_mentions": 0.0
+      },
+      "experiment-setup": {
+        "average_sentence_length": 0.0,
+        "citations": 0.0,
+        "hedges": 0.0,
+        "first_person_markers": 0.0,
+        "figure_mentions": 0.0,
+        "table_mentions": 0.0
+      },
+      "results-analysis": {
+        "average_sentence_length": 0.0,
+        "citations": 0.0,
+        "hedges": 0.0,
+        "first_person_markers": 0.0,
+        "figure_mentions": 0.0,
+        "table_mentions": 0.0
+      },
+      "conclusion": {
+        "average_sentence_length": 0.0,
+        "citations": 0.0,
+        "hedges": 0.0,
+        "first_person_markers": 0.0,
+        "figure_mentions": 0.0,
+        "table_mentions": 0.0
+      }
+    }
+  },
+  "module_fingerprints": {
+    "en": {
+      "abstract": "ea6008d03c7404622509d696fc0e18d08f04bc575d3bac5bc9529be3eedbd21f",
+      "introduction": "8022446be7435723e2ba76532f4679b182690d37b1319300808b04a3d31fd273",
+      "related-work": "7a623ad4d9b82934e0af5ac1493ab5c56e54ad86a293b68659528ccc56a1d48d",
+      "problem-definition": "0599cc35181413095d79a94f2aef26fc54c0a1bc7b6cc4b5420f4f2150e250d9",
+      "methodology": "3f187fa33ddc2b8b4f71781738f8b6199991d1cc72a33bf283e2b5aff29b1aba",
+      "experiment-setup": "71e7ca1a852c6ef951479df1dab0f4c1dc52948daf1812c14480ff972a65cac1",
+      "results-analysis": "2313a4be2127477c6ca5e4b5b7f23952d7161ae83d5e66f813d8d1423074ec57",
+      "conclusion": "87c048f4c45165adfb7b7e76204e51c894d888789f4c1fb605c70f49c8f60c03"
+    },
+    "zh": {
+      "abstract": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "introduction": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "related-work": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "problem-definition": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "methodology": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "experiment-setup": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "results-analysis": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "conclusion": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "semantic_refresh_required": [],
+  "semantic_synthesis_complete": true,
+  "integration_status": "complete",
+  "bilingual_status": "degraded-single-language",
+  "integrated_at": "2026-10-07T13:52:07+00:00"
+}

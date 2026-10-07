@@ -32,6 +32,34 @@ Paper Alchemist 从参考论文中学习不同章节的组织方式、论证顺�
 
 Paper Alchemist 支持 Codex、Claude Code、OpenCode、Hermes、Pi Agent 和 Kimi Code。安装后直接在对话中说明想蒸馏哪些论文或想生成哪个章节即可。
 
+## 复用已发布画像（Cyrus）
+
+已发布的 **IPM** 画像使用小写 CLI slug `ipm`：`profile_slug` 会 casefold 名称，
+因此 `--profile IPM` 与 `--profile ipm` 指向同一本地路径。
+详见 [Cyrus 初始化与模板](README.cyrus.md) 和 [画像覆盖](profiles/ipm/README.md)。
+
+```bash
+bash cyrus-setup.sh IPM
+paper-alchemist validate-profile --profile ipm --workspace .
+```
+
+setup 自动发现 `profiles/` 下带 `source-manifest.json` 的直接子目录，先验证隔离副本再安装，
+已有本地画像只验证、不覆盖。默认选择 IPM；传入其他名称可选择其他画像（包括私有本地画像）。
+必须校验用户所选画像并要求 `generation_ready: true`；初始化或校验失败时停止写作。
+不调用 API、不下载 PDF、不重新蒸馏；包括旧 `routing-literature` 在内的私有画像全部保留。
+
+IPM 是已有 **47 篇来源 / 46 篇纳入的混合会议与期刊语料** 的重命名，
+不是 IPM 专属语料或经认证的期刊规则。重命名未用 MinerU 等工具重新解析来源，也未修复现有抽取限制。
+所有中文模块仍为零直接语料、低置信度。`npj` 是未来的独立画像，发布独立包前不可用，不能用 IPM 冒充。
+
+```text
+请使用 Paper Alchemist 的 IPM 画像（或我明确选择的其他画像）。
+先阅读其覆盖与限制，用所选名称运行 setup，并校验所选画像；
+generation_ready 不为 true 时停止。保留事实、数字、引用键及结论力度，报告证据缺口。
+```
+
+下文用 `my-literature` 演示学习新的私有语料，不代表已发布的 IPM 语料。
+
 ## 从安装到写作
 
 整个过程都可以通过和 Agent 对话完成。你不需要学习命令，也不需要手工准备配置文件。
@@ -55,7 +83,7 @@ Paper Alchemist 支持 Codex、Claude Code、OpenCode、Hermes、Pi Agent 和 Ki
 
 ```text
 请使用 Paper Alchemist 学习 ./papers 中论文的写作方式，
-并把这套论文画像命名为 routing-literature。
+并把这套论文画像命名为 my-literature。
 请完成全部章节的学习和检查，不要只处理文件内容就停下。
 保护好我的论文和研究材料，不要把它们提交到版本控制。
 完成后告诉我这套画像是否已经可以用于写作、哪些论文被采用，以及有哪些限制。
@@ -67,7 +95,7 @@ Paper Alchemist 支持 Codex、Claude Code、OpenCode、Hermes、Pi Agent 和 Ki
 
 画像可用后，你会看到清楚的结果说明，例如：
 
-> **`routing-literature` 画像已经准备好，可以开始写作。** 本次采用了 18 篇论文；另有 2 篇无法读取，未参与学习。结果分析部分的英文参考较少，生成时会更加谨慎。
+> **`my-literature` 画像已经准备好，可以开始写作。** 本次采用了 18 篇论文；另有 2 篇无法读取，未参与学习。结果分析部分的英文参考较少，生成时会更加谨慎。
 
 如果 Agent 只告诉你“论文已经读取”或“还有章节没有完成”，回复“请继续完成这套画像，准备好后再告诉我”即可。
 
@@ -76,7 +104,7 @@ Paper Alchemist 支持 Codex、Claude Code、OpenCode、Hermes、Pi Agent 和 Ki
 告诉 Agent 你想先写哪个部分，并提供现有研究材料的位置。材料可以是论文草稿、研究笔记、实验表格、结果文件或 BibTeX 文献库。
 
 ```text
-请使用 routing-literature 画像帮我写中文文献综述。
+请使用 my-literature 画像帮我写中文文献综述。
 我的研究材料在 ./draft/，实验结果在 ./results/，参考文献在 ./references.bib。
 请先阅读这些材料，整理出可以使用的研究事实和引用；有不清楚或缺少的内容时，
 分几次向我提问。确认信息无误后再生成文献综述，不要补写未经确认的事实。
@@ -85,7 +113,7 @@ Paper Alchemist 支持 Codex、Claude Code、OpenCode、Hermes、Pi Agent 和 Ki
 如果材料还没有整理好，也可以直接说：
 
 ```text
-请使用 routing-literature 画像帮我写中文摘要。
+请使用 my-literature 画像帮我写中文摘要。
 我的研究材料还没有整理好，请一次问我几个容易回答的问题，
 逐步确认研究问题、方法、贡献和结果，然后再生成摘要。
 ```
@@ -112,7 +140,7 @@ Agent 会先整理并确认当前章节真正需要的信息，再开始写作�
 需要全文初稿时，可以说：
 
 ```text
-请使用 routing-literature 画像和我提供的研究材料生成一份完整论文初稿。
+请使用 my-literature 画像和我提供的研究材料生成一份完整论文初稿。
 先确认全文需要的事实和引用，再分别生成引言、文献综述、问题定义、方法、
 实验设置、结果分析、结论和摘要。保持术语、贡献表述、数字和引用前后一致，
 最后合并成一个 LaTeX 文件保存到 ./draft/paper.tex。

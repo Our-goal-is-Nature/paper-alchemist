@@ -32,6 +32,40 @@ Reference papers provide experience about how to write. Your drafts, experiment 
 
 Paper Alchemist supports Codex, Claude Code, OpenCode, Hermes, Pi Agent, and Kimi Code. After installation, describe the papers you want to distill or the section you want to draft.
 
+## Reuse a published profile (Cyrus)
+
+The published **IPM** profile uses the lower-case CLI slug `ipm`: `profile_slug`
+casefolds names, so `--profile IPM` and `--profile ipm` select the same local path.
+See [Cyrus setup and templates](README.cyrus.md) and [profile coverage](profiles/ipm/README.md).
+
+```bash
+bash cyrus-setup.sh IPM
+paper-alchemist validate-profile --profile ipm --workspace .
+```
+
+Setup discovers all immediate `profiles/` directories with a `source-manifest.json`,
+validates isolated copies before installation, and never overwrites existing local
+profiles. It defaults to IPM; pass another profile name to select it (including a
+private local profile). The selected profile must report `generation_ready: true`;
+stop on setup or validation failure. No API calls, PDF downloads, or re-distillation
+are performed. Private profiles, including the old `routing-literature`, are preserved.
+
+IPM is a rename of the existing **47-source / 46-included mixed-venue corpus**,
+not an IPM-exclusive corpus or certified journal rules. The rename did not re-parse
+sources with MinerU or resolve extraction limitations. All Chinese modules still have zero direct
+evidence and low confidence. `npj` is a future separate profile, unavailable until
+its own bundle is published; never substitute IPM for it.
+
+```text
+Use Paper Alchemist with profile IPM (or my explicitly selected profile).
+Read its coverage and limitations, run setup with that selection, and validate that
+selected profile before polishing. Stop if generation_ready is not true. Preserve
+my facts, numbers, citation keys, and claim strength; report evidence gaps.
+```
+
+The learning examples below use `my-literature` for a new private corpus, not the
+published IPM corpus.
+
 ## From installation to writing
 
 The entire workflow can be completed by talking to your Agent. You do not need to learn commands or prepare configuration files by hand.
@@ -56,7 +90,7 @@ Put the reference papers in a folder such as `./papers/`, then say:
 
 ```text
 Use Paper Alchemist to learn the writing patterns in ./papers and name the profile
-routing-literature. Complete the learning and checks for every paper section; do not
+my-literature. Complete the learning and checks for every paper section; do not
 stop after merely reading the files. Keep my papers and research materials out of
 version control. When finished, tell me whether the profile is ready for writing,
 which papers were used, and any limitations.
@@ -68,7 +102,7 @@ This may take some time. The Agent continues reading papers, analyzing their sec
 
 When the profile is usable, you receive a clear summary such as:
 
-> **The `routing-literature` profile is ready for writing.** Eighteen papers were used and two could not be read. English evidence for results analysis is limited, so that section will be generated more cautiously.
+> **The `my-literature` profile is ready for writing.** Eighteen papers were used and two could not be read. English evidence for results analysis is limited, so that section will be generated more cautiously.
 
 If the Agent says only that the papers were read or that some sections remain unfinished, reply: “Continue until the profile is ready for writing, then tell me.”
 
@@ -77,7 +111,7 @@ If the Agent says only that the papers were read or that some sections remain un
 Tell the Agent which part you want to write first and where to find your existing research materials. These can include a draft, research notes, experiment tables, result files, or a BibTeX library.
 
 ```text
-Use the routing-literature profile to help me write an English related-work section.
+Use the my-literature profile to help me write an English related-work section.
 My research materials are in ./draft/, experiment results are in ./results/, and
 references are in ./references.bib. Read them first and organize the research facts
 and citations that can be used. Ask me about missing or unclear details in a few short
@@ -87,7 +121,7 @@ rounds. After confirming the information, draft the section without adding unsup
 If your materials are not organized yet, say:
 
 ```text
-Use the routing-literature profile to help me write an English abstract.
+Use the my-literature profile to help me write an English abstract.
 My research materials are not organized yet. Ask me a few easy questions at a time
 to confirm the research problem, method, contributions, and results, then draft the abstract.
 ```
@@ -114,7 +148,7 @@ For one section, simply say “draft the abstract first” or “generate only r
 For a complete paper draft, say:
 
 ```text
-Use the routing-literature profile and my research materials to create a complete paper draft.
+Use the my-literature profile and my research materials to create a complete paper draft.
 First confirm the facts and citations needed across the paper. Then draft the introduction,
 related work, problem definition, methodology, experiment setup, results analysis,
 conclusion, and abstract as separate sections. Keep terminology, contribution statements,
